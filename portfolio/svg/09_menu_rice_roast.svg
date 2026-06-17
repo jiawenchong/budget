@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1400" viewBox="0 0 1000 1400">
+  
+  <rect width="1000" height="1400" fill="#fbf3e3"/>
+  <rect x="26" y="26" width="948" height="1348" fill="none" stroke="#c9893c" stroke-width="2"/>
+  
+  
+  <rect x="0" y="0" width="1000" height="230" fill="#8c1f1a"/>
+  <path d="M0,230 L1000,230 L1000,246 L0,210 Z" fill="#8c1f1a"/>
+  <text x="500" y="110" font-family="Noto Sans CJK TC Black" font-weight="900" font-size="64" fill="#f3e3bd" text-anchor="middle">粥麵飯 · 燒味</text>
+  <text x="500" y="158" font-family="Noto Sans CJK TC" font-weight="700" font-size="30" letter-spacing="6" fill="#c9893c" text-anchor="middle">RICE, NOODLES &amp; ROAST MEATS</text>
+  <text x="500" y="195" font-family="Noto Sans CJK TC" font-weight="400" font-size="20" letter-spacing="2" fill="#e9c98a" text-anchor="middle">WOK-FRIED · SLOW-ROASTED · COMFORT BOWLS</text>
+  
+  
+  <g transform="translate(0,230)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <path d="M -8,-70 q 14,-8 18,4 l 4,8" fill="none" stroke="#7a2a12" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="14" cy="-58" rx="13" ry="11" fill="#a8431f"/>
+    <path d="M 24,-60 l 14,4 l -14,8 Z" fill="#d8a13c"/>
+    <path d="M -34,-44 C -42,-12 -38,30 -10,42 C 14,50 38,30 34,-10 C 30,-40 4,-58 -10,-50 C -22,-44 -30,-50 -34,-44 Z" fill="#a8431f"/>
+    <path d="M -28,-30 q 30,-10 56,6" fill="none" stroke="#7a2a12" stroke-width="2" opacity="0.5"/>
+    <path d="M -26,0 q 28,-6 54,8" fill="none" stroke="#7a2a12" stroke-width="2" opacity="0.5"/>
+    <path d="M -18,26 q 22,-2 40,10" fill="none" stroke="#7a2a12" stroke-width="2" opacity="0.5"/>
+    <path d="M -2,42 L -10,68" stroke="#7a2a12" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 14,44 L 16,70" stroke="#7a2a12" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">燒鵲飯</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">ROAST DUCK RICE</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Crispy skin roast duck on steamed rice</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$58</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(0,410)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <path d="M -55,0 a 55,30 0 0 0 110,0 Z" fill="#c0392b"/>
+    <ellipse cx="0" cy="-4" rx="55" ry="20" fill="#f5ecd2"/>
+    <rect x="-30" y="-22" width="22" height="14" rx="4" fill="#9c3a26" transform="rotate(-10)"/>
+    <rect x="-2" y="-26" width="22" height="14" rx="4" fill="#9c3a26" transform="rotate(8)"/>
+    <rect x="14" y="-16" width="20" height="13" rx="4" fill="#9c3a26" transform="rotate(-5)"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">叉燒飯</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">CHAR SIU RICE</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Honey-glazed BBQ pork on steamed rice</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$52</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(0,590)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <path d="M -55,0 a 55,30 0 0 0 110,0 Z" fill="#b6312a"/>
+    <ellipse cx="0" cy="-4" rx="55" ry="20" fill="#e8b84a"/>
+    <path d="M -30,-8 q 8,-12 16,0 q 8,-12 16,0 q 8,-12 16,0" stroke="#f3d98a" stroke-width="5" fill="none"/>
+    <path d="M -25,2 q 8,-12 16,0 q 8,-12 16,0" stroke="#f3d98a" stroke-width="5" fill="none"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">雲吞麵</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">WONTON NOODLES</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Shrimp wontons, egg noodles, clear broth</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$42</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(0,770)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <path d="M -55,0 a 55,30 0 0 0 110,0 Z" fill="#a8431f"/>
+    <ellipse cx="0" cy="-4" rx="55" ry="20" fill="#7a4a2e"/>
+    <path d="M -30,-8 q 8,-12 16,0 q 8,-12 16,0 q 8,-12 16,0" stroke="#f3d98a" stroke-width="5" fill="none"/>
+    <path d="M -25,2 q 8,-12 16,0 q 8,-12 16,0" stroke="#f3d98a" stroke-width="5" fill="none"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">干炒牛河</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">BEEF CHOW FUN</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Wok-fried rice noodles, beef &amp; bean sprouts</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$56</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(0,950)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <path d="M -55,0 a 55,30 0 0 0 110,0 Z" fill="#8c1f1a"/>
+    <ellipse cx="0" cy="-4" rx="55" ry="20" fill="#e8e0c4"/>
+    <rect x="-30" y="-22" width="22" height="14" rx="4" fill="#d8a13c" transform="rotate(-10)"/>
+    <rect x="-2" y="-26" width="22" height="14" rx="4" fill="#d8a13c" transform="rotate(8)"/>
+    <rect x="14" y="-16" width="20" height="13" rx="4" fill="#d8a13c" transform="rotate(-5)"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">皮蛋瘦肉粥</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">CENTURY EGG CONGEE</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Silky rice congee, pork &amp; preserved egg</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$38</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(0,1130)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <path d="M -55,0 a 55,30 0 0 0 110,0 Z" fill="#c9893c"/>
+    <ellipse cx="0" cy="-4" rx="55" ry="20" fill="#e8c46a"/>
+    <path d="M -30,-8 q 8,-12 16,0 q 8,-12 16,0 q 8,-12 16,0" stroke="#f3d98a" stroke-width="5" fill="none"/>
+    <path d="M -25,2 q 8,-12 16,0 q 8,-12 16,0" stroke="#f3d98a" stroke-width="5" fill="none"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">星洲炒米</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">SINGAPORE NOODLES</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Curry-spiced rice vermicelli, prawns &amp; egg</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$48</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  
+  <line x1="80" y1="1310" x2="920" y2="1310" stroke="#c9893c" stroke-width="1.5"/>
+  <text x="500" y="1345" font-family="Noto Sans CJK TC" font-weight="400" font-size="20" letter-spacing="3" fill="#c9893c" text-anchor="middle">龍鳳冰室 · LUNG FUNG CAFE</text>
+  <text x="920" y="1345" font-family="Noto Sans CJK TC" font-weight="400" font-size="20" fill="#c9893c" text-anchor="end">02</text>
+  
+</svg>

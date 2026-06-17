@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1400" viewBox="0 0 1000 1400">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b1055"/>
+      <stop offset="0.55" stop-color="#7b2ff7"/>
+      <stop offset="1" stop-color="#ff6b6b"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd166"/>
+      <stop offset="1" stop-color="#ef476f"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1000" height="1400" fill="#120822"/>
+  <rect width="1000" height="780" fill="url(#sky)"/>
+  <circle cx="500" cy="360" r="190" fill="url(#sun)"/>
+
+  <circle cx="324" cy="78" r="22" fill="#ff6b6b" opacity="0.83"/><circle cx="94" cy="303" r="28" fill="#ffd166" opacity="0.51"/><circle cx="434" cy="36" r="10" fill="#118ab2" opacity="0.52"/><circle cx="565" cy="493" r="22" fill="#ef476f" opacity="0.88"/><circle cx="577" cy="206" r="29" fill="#ff6b6b" opacity="0.72"/><circle cx="133" cy="218" r="20" fill="#ef476f" opacity="0.62"/><circle cx="816" cy="94" r="21" fill="#ffd166" opacity="0.65"/><circle cx="548" cy="33" r="9" fill="#ffd166" opacity="0.70"/><circle cx="532" cy="404" r="18" fill="#118ab2" opacity="0.64"/><circle cx="248" cy="93" r="25" fill="#ff6b6b" opacity="0.73"/><circle cx="525" cy="455" r="24" fill="#06d6a0" opacity="0.74"/><circle cx="73" cy="266" r="12" fill="#06d6a0" opacity="0.56"/><circle cx="489" cy="20" r="23" fill="#ef476f" opacity="0.73"/><circle cx="875" cy="163" r="23" fill="#ef476f" opacity="0.70"/><circle cx="797" cy="36" r="10" fill="#06d6a0" opacity="0.69"/><circle cx="664" cy="32" r="23" fill="#ef476f" opacity="0.90"/><circle cx="822" cy="148" r="16" fill="#06d6a0" opacity="0.51"/><circle cx="462" cy="87" r="11" fill="#ff6b6b" opacity="0.59"/><circle cx="287" cy="384" r="17" fill="#118ab2" opacity="0.53"/><circle cx="449" cy="286" r="27" fill="#118ab2" opacity="0.85"/><circle cx="278" cy="216" r="16" fill="#118ab2" opacity="0.88"/><circle cx="151" cy="92" r="13" fill="#ffd166" opacity="0.50"/><circle cx="831" cy="95" r="14" fill="#ffd166" opacity="0.67"/><circle cx="369" cy="294" r="29" fill="#ef476f" opacity="0.88"/><circle cx="655" cy="385" r="18" fill="#ef476f" opacity="0.66"/><circle cx="399" cy="54" r="22" fill="#ff6b6b" opacity="0.58"/>
+
+  <!-- mountains silhouette -->
+  <polygon points="0,780 220,560 380,720 520,500 700,700 880,580 1000,780" fill="#1a0e30"/>
+  <polygon points="0,780 150,640 320,760 470,610 650,760 820,650 1000,780" fill="#0d0618"/>
+
+  <!-- crowd silhouette -->
+  <g fill="#0d0618">
+    <circle cx="120" cy="745" r="14"/><rect x="106" y="755" width="28" height="40"/>
+    <circle cx="180" cy="750" r="14"/><rect x="166" y="760" width="28" height="36"/>
+    <circle cx="260" cy="742" r="16"/><rect x="244" y="754" width="32" height="44"/>
+    <circle cx="340" cy="748" r="14"/><rect x="326" y="758" width="28" height="38"/>
+    <circle cx="420" cy="744" r="15"/><rect x="405" y="755" width="30" height="42"/>
+    <circle cx="520" cy="750" r="14"/><rect x="506" y="760" width="28" height="36"/>
+    <circle cx="600" cy="743" r="16"/><rect x="584" y="755" width="32" height="44"/>
+    <circle cx="690" cy="748" r="14"/><rect x="676" y="758" width="28" height="38"/>
+    <circle cx="770" cy="745" r="15"/><rect x="755" y="756" width="30" height="40"/>
+    <circle cx="860" cy="750" r="14"/><rect x="846" y="760" width="28" height="36"/>
+  </g>
+
+  <rect x="0" y="780" width="1000" height="620" fill="#120822"/>
+
+  <text x="500" y="940" font-family="Noto Sans CJK TC" font-weight="900" font-size="120" letter-spacing="4" fill="#ffffff" text-anchor="middle">SUNSET</text>
+  <text x="500" y="1040" font-family="Noto Sans CJK TC" font-weight="900" font-size="74" letter-spacing="10" fill="#ffd166" text-anchor="middle">MUSIC FESTIVAL</text>
+
+  <line x1="260" y1="1090" x2="740" y2="1090" stroke="#ef476f" stroke-width="3"/>
+
+  <text x="500" y="1160" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" letter-spacing="2" fill="#ffffff" text-anchor="middle">AUGUST 14 – 16 · CLEARWATER BAY PARK</text>
+  <text x="500" y="1210" font-family="Noto Sans CJK TC" font-weight="400" font-size="26" fill="#c9b8e8" text-anchor="middle">3 STAGES · 40+ ARTISTS · FOOD &amp; ART MARKET</text>
+
+  <rect x="370" y="1255" width="260" height="70" rx="35" fill="#ef476f"/>
+  <text x="500" y="1300" font-family="Noto Sans CJK TC" font-weight="700" font-size="30" letter-spacing="2" fill="#ffffff" text-anchor="middle">GET TICKETS</text>
+</svg>

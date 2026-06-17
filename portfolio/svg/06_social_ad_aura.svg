@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <radialGradient id="bg" cx="0.3" cy="0.25" r="1">
+      <stop offset="0" stop-color="#fef3ea"/>
+      <stop offset="1" stop-color="#f3d9c9"/>
+    </radialGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+
+  <circle cx="860" cy="180" r="260" fill="#f6c9a8" opacity="0.55"/>
+  <circle cx="120" cy="920" r="220" fill="#e7a98c" opacity="0.45"/>
+
+  <text x="90" y="160" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" letter-spacing="6" fill="#7a4a2e">AURA SKINCARE</text>
+
+  <text x="90" y="320" font-family="Noto Sans CJK TC" font-weight="900" font-size="96" fill="#4a2c1a">NEW</text>
+  <text x="90" y="420" font-family="Noto Sans CJK TC" font-weight="900" font-size="96" fill="#4a2c1a">GLOW</text>
+  <text x="90" y="500" font-family="Noto Sans CJK TC" font-weight="900" font-size="96" fill="#4a2c1a">SERUM</text>
+
+  <rect x="90" y="540" width="230" height="64" rx="32" fill="#c9683c"/>
+  <text x="205" y="582" font-family="Noto Sans CJK TC" font-weight="700" font-size="28" letter-spacing="2" fill="#ffffff" text-anchor="middle">30% OFF</text>
+
+  <text x="90" y="700" font-family="Noto Sans CJK TC" font-weight="400" font-size="24" fill="#7a4a2e">Launch week only · while stocks last</text>
+
+  
+    <g transform="translate(820,700) scale(1.5)">
+      <rect x="-46" y="-10" width="92" height="230" rx="20" fill="#fbe6d8"/>
+      <rect x="-30" y="-46" width="60" height="46" rx="10" fill="#c9683c"/>
+      <rect x="-14" y="-66" width="28" height="26" rx="6" fill="#c9683c"/>
+      <rect x="-30" y="60" width="60" height="60" rx="8" fill="#ffffff" opacity="0.85"/>
+    </g>
+  
+    <g transform="translate(700,760) scale(1.2)">
+      <rect x="-46" y="-10" width="92" height="230" rx="20" fill="#f3d3bb"/>
+      <rect x="-30" y="-46" width="60" height="46" rx="10" fill="#9c5230"/>
+      <rect x="-14" y="-66" width="28" height="26" rx="6" fill="#9c5230"/>
+      <rect x="-30" y="60" width="60" height="60" rx="8" fill="#ffffff" opacity="0.85"/>
+    </g>
+
+  <text x="90" y="980" font-family="Noto Sans CJK TC" font-weight="700" font-size="28" letter-spacing="3" fill="#7a4a2e">SHOP NOW AT AURASKIN.CO</text>
+</svg>

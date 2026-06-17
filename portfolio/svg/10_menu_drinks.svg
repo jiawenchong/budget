@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1400" viewBox="0 0 1000 1400">
+  
+  <rect width="1000" height="1400" fill="#fbf3e3"/>
+  <rect x="26" y="26" width="948" height="1348" fill="none" stroke="#c9893c" stroke-width="2"/>
+  
+  
+  <rect x="0" y="0" width="1000" height="230" fill="#8c1f1a"/>
+  <path d="M0,230 L1000,230 L1000,246 L0,210 Z" fill="#8c1f1a"/>
+  <text x="500" y="110" font-family="Noto Sans CJK TC Black" font-weight="900" font-size="64" fill="#f3e3bd" text-anchor="middle">飲品 · 甜品</text>
+  <text x="500" y="158" font-family="Noto Sans CJK TC" font-weight="700" font-size="30" letter-spacing="6" fill="#c9893c" text-anchor="middle">DRINKS &amp; DESSERTS</text>
+  <text x="500" y="195" font-family="Noto Sans CJK TC" font-weight="400" font-size="20" letter-spacing="2" fill="#e9c98a" text-anchor="middle">HK STYLE BEVERAGES &amp; SWEET TREATS</text>
+  
+  
+  <g transform="translate(0,230)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <ellipse cx="0" cy="48" rx="48" ry="10" fill="#b6312a"/>
+    <path d="M -32,-30 L -24,40 L 24,40 L 32,-30 Z" fill="#f3e3bd"/>
+    <ellipse cx="0" cy="-30" rx="32" ry="9" fill="#7a4a2e"/>
+    <path d="M 32,-10 q 26,0 22,22 q -4,16 -26,10" fill="none" stroke="#f3e3bd" stroke-width="8"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">港式奶茶</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">HK MILK TEA</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Silk-stocking brewed black tea &amp; evaporated milk</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$22</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(0,410)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <path d="M -30,-30 L -22,40 L 22,40 L 30,-30 Z" fill="#f3e3bd"/>
+    <ellipse cx="0" cy="-30" rx="30" ry="8" fill="#9c7a2e"/>
+    <circle cx="-8" cy="0" r="10" fill="#e8c94a"/>
+    <circle cx="10" cy="14" r="9" fill="#e8c94a"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">檸檬茶</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">LEMON TEA</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Hot or iced, fresh lemon slices</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$20</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(0,590)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <ellipse cx="0" cy="48" rx="46" ry="10" fill="#8c1f1a"/>
+    <path d="M -30,-28 L -22,40 L 22,40 L 30,-28 Z" fill="#f3e3bd"/>
+    <path d="M -30,-28 a 30,10 0 0 0 60,0 Z" fill="#5a3a22"/>
+    <path d="M -10,-28 a 30,10 0 0 0 20,0 Z" fill="#c08a4e"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">鴛鴦</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">YIN YEUNG</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Coffee &amp; tea blend, evaporated milk</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$24</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(0,770)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <path d="M -40,10 Q -40,-22 0,-22 Q 40,-22 40,10 Z" fill="#d8a13c"/>
+    <path d="M -40,10 Q 0,28 40,10 Q 0,2 -40,10 Z" fill="#d8a13c"/>
+    <ellipse cx="0" cy="-6" rx="30" ry="16" fill="#f3c14a"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">蛋撻</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">EGG TART</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Flaky crust, warm silky custard</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$14</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(0,950)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <ellipse cx="0" cy="20" rx="48" ry="26" fill="#e8b84a"/>
+    <circle cx="-14" cy="0" r="9" fill="#fbe8c8"/>
+    <circle cx="10" cy="-6" r="9" fill="#fbe8c8"/>
+    <circle cx="0" cy="10" r="9" fill="#fbe8c8"/>
+    <path d="M -40,10 Q 0,-26 40,10" fill="none" stroke="#d8902c" stroke-width="4"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">楊枝甘露</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">MANGO SAGO POMELO</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Chilled mango cream, sago &amp; pomelo</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$32</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(0,1130)">
+    <circle cx="120" cy="60" r="68" fill="#f3e3c4"/>
+    <g transform="translate(120,60) scale(0.62)">
+    <path d="M -26,-32 L -20,40 L 20,40 L 26,-32 Z" fill="#dff0e8" opacity="0.85"/>
+    <ellipse cx="0" cy="-32" rx="26" ry="7" fill="#bfe0d0"/>
+    <circle cx="0" cy="6" r="10" fill="#e8c94a"/>
+    <circle cx="-12" cy="-8" r="4" fill="#ffffff"/>
+    <circle cx="10" cy="20" r="4" fill="#ffffff"/>
+    </g>
+    <text x="232" y="42" font-family="Noto Sans CJK TC" font-weight="700" font-size="34" fill="#4a2d18">凍檸水</text>
+    <text x="232" y="74" font-family="Noto Sans CJK TC" font-weight="400" font-size="21" letter-spacing="1" fill="#c9893c">ICED LEMON WATER</text>
+    <text x="232" y="104" font-family="Noto Sans CJK TC" font-weight="400" font-size="18" fill="#8a7460">Refreshing iced water, fresh lemon</text>
+    <text x="910" y="60" font-family="Noto Sans CJK TC" font-weight="700" font-size="32" fill="#8c1f1a" text-anchor="end">$18</text>
+    <line x1="100" y1="160" x2="910" y2="160" stroke="#e0cda0" stroke-width="1.5"/>
+  </g>
+  
+  <line x1="80" y1="1310" x2="920" y2="1310" stroke="#c9893c" stroke-width="1.5"/>
+  <text x="500" y="1345" font-family="Noto Sans CJK TC" font-weight="400" font-size="20" letter-spacing="3" fill="#c9893c" text-anchor="middle">龍鳳冰室 · LUNG FUNG CAFE</text>
+  <text x="920" y="1345" font-family="Noto Sans CJK TC" font-weight="400" font-size="20" fill="#c9893c" text-anchor="end">03</text>
+  
+</svg>

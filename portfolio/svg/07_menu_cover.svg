@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1400" viewBox="0 0 1000 1400">
+  <defs>
+    <linearGradient id="redbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8c1f1a"/>
+      <stop offset="1" stop-color="#5e120f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1000" height="1400" fill="url(#redbg)"/>
+
+  <rect x="36" y="36" width="928" height="1328" fill="none" stroke="#d8a13c" stroke-width="3"/>
+  
+    <g transform="translate(36,36) rotate(0)">
+      <path d="M0,0 L90,0 L90,14 L14,14 L14,90 L0,90 Z" fill="#d8a13c"/>
+      <circle cx="40" cy="40" r="6" fill="#d8a13c"/>
+    </g>
+  
+    <g transform="translate(964,36) rotate(90)">
+      <path d="M0,0 L90,0 L90,14 L14,14 L14,90 L0,90 Z" fill="#d8a13c"/>
+      <circle cx="40" cy="40" r="6" fill="#d8a13c"/>
+    </g>
+  
+    <g transform="translate(964,1364) rotate(180)">
+      <path d="M0,0 L90,0 L90,14 L14,14 L14,90 L0,90 Z" fill="#d8a13c"/>
+      <circle cx="40" cy="40" r="6" fill="#d8a13c"/>
+    </g>
+  
+    <g transform="translate(36,1364) rotate(270)">
+      <path d="M0,0 L90,0 L90,14 L14,14 L14,90 L0,90 Z" fill="#d8a13c"/>
+      <circle cx="40" cy="40" r="6" fill="#d8a13c"/>
+    </g>
+
+  <text x="500" y="170" font-family="Noto Sans CJK TC" font-weight="400" font-size="26" letter-spacing="8" fill="#e9c98a" text-anchor="middle">EST. 1968 · HONG KONG STYLE</text>
+
+  <text x="500" y="330" font-family="Noto Sans CJK TC Black" font-weight="900" font-size="150" fill="#f3e3bd" text-anchor="middle">龍鳳冰室</text>
+  <text x="500" y="400" font-family="Noto Sans CJK TC" font-weight="700" font-size="42" letter-spacing="10" fill="#d8a13c" text-anchor="middle">LUNG FUNG CAFE</text>
+
+  <line x1="280" y1="450" x2="720" y2="450" stroke="#d8a13c" stroke-width="2"/>
+
+  <g transform="translate(290,700) scale(1.05)">
+    <ellipse cx="0" cy="40" rx="62" ry="40" fill="#b6312a"/>
+    <path d="M -60,30 C -90,10 -90,-20 -55,-15" stroke="#b6312a" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M 55,5 L 95,-25 L 102,-15 L 65,18 Z" fill="#b6312a"/>
+    <ellipse cx="0" cy="2" rx="40" ry="12" fill="#d8a13c"/>
+    <circle cx="0" cy="-10" r="14" fill="#d8a13c"/>
+    <circle cx="0" cy="-10" r="6" fill="#b6312a"/>
+    </g>
+  <g transform="translate(500,720) scale(1.0)">
+    <ellipse cx="0" cy="-32" rx="58" ry="14" fill="#8a5a28"/>
+    <rect x="-55" y="-30" width="110" height="60" rx="8" fill="#c08a4e"/>
+    <line x1="-55" y1="-30" x2="55" y2="-30" stroke="#8a5a28" stroke-width="3"/><line x1="-55" y1="-18" x2="55" y2="-18" stroke="#8a5a28" stroke-width="3"/><line x1="-55" y1="-6" x2="55" y2="-6" stroke="#8a5a28" stroke-width="3"/><line x1="-55" y1="6" x2="55" y2="6" stroke="#8a5a28" stroke-width="3"/><line x1="-55" y1="18" x2="55" y2="18" stroke="#8a5a28" stroke-width="3"/><line x1="-55" y1="30" x2="55" y2="30" stroke="#8a5a28" stroke-width="3"/>
+    <ellipse cx="0" cy="30" rx="58" ry="12" fill="#8a5a28"/>
+    </g>
+  <g transform="translate(710,700) scale(0.95)">
+    <path d="M -8,-70 q 14,-8 18,4 l 4,8" fill="none" stroke="#7a2a12" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="14" cy="-58" rx="13" ry="11" fill="#a8431f"/>
+    <path d="M 24,-60 l 14,4 l -14,8 Z" fill="#d8a13c"/>
+    <path d="M -34,-44 C -42,-12 -38,30 -10,42 C 14,50 38,30 34,-10 C 30,-40 4,-58 -10,-50 C -22,-44 -30,-50 -34,-44 Z" fill="#a8431f"/>
+    <path d="M -28,-30 q 30,-10 56,6" fill="none" stroke="#7a2a12" stroke-width="2" opacity="0.5"/>
+    <path d="M -26,0 q 28,-6 54,8" fill="none" stroke="#7a2a12" stroke-width="2" opacity="0.5"/>
+    <path d="M -18,26 q 22,-2 40,10" fill="none" stroke="#7a2a12" stroke-width="2" opacity="0.5"/>
+    <path d="M -2,42 L -10,68" stroke="#7a2a12" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 14,44 L 16,70" stroke="#7a2a12" stroke-width="5" stroke-linecap="round"/>
+    </g>
+  <g transform="translate(395,920) scale(0.85)">
+    <ellipse cx="0" cy="48" rx="48" ry="10" fill="#b6312a"/>
+    <path d="M -32,-30 L -24,40 L 24,40 L 32,-30 Z" fill="#f3e3bd"/>
+    <ellipse cx="0" cy="-30" rx="32" ry="9" fill="#7a4a2e"/>
+    <path d="M 32,-10 q 26,0 22,22 q -4,16 -26,10" fill="none" stroke="#f3e3bd" stroke-width="8"/>
+    </g>
+  <g transform="translate(610,920) scale(0.85)">
+    <ellipse cx="0" cy="48" rx="48" ry="10" fill="#b6312a"/>
+    <path d="M -32,-30 L -24,40 L 24,40 L 32,-30 Z" fill="#f3e3bd"/>
+    <ellipse cx="0" cy="-30" rx="32" ry="9" fill="#7a4a2e"/>
+    <path d="M 32,-10 q 26,0 22,22 q -4,16 -26,10" fill="none" stroke="#f3e3bd" stroke-width="8"/>
+    </g>
+
+  <line x1="280" y1="1080" x2="720" y2="1080" stroke="#d8a13c" stroke-width="2"/>
+
+  <text x="500" y="1170" font-family="Noto Sans CJK TC" font-weight="700" font-size="50" letter-spacing="4" fill="#f3e3bd" text-anchor="middle">港 式 茶 餐 廳</text>
+  <text x="500" y="1220" font-family="Noto Sans CJK TC" font-weight="400" font-size="26" letter-spacing="3" fill="#e9c98a" text-anchor="middle">DIM SUM · RICE &amp; NOODLES · ROAST MEATS · DRINKS</text>
+
+  <text x="500" y="1320" font-family="Noto Sans CJK TC" font-weight="400" font-size="22" fill="#c79a5c" text-anchor="middle">SHOP 8, KING&#39;S ROAD, NORTH POINT, HONG KONG</text>
+</svg>
