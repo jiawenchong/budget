@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>记账本</title>
+<style>
+  :root{
+    --accent:#2f7d6b;
+    --accent-light:#e6f2ef;
+    --bg:#f5f6f8;
+    --card:#ffffff;
+    --text:#1c2024;
+    --muted:#8a8f98;
+    --danger:#d1453d;
+    --warn:#c98a1f;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-tap-highlight-color:transparent;
+  }
+  #app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding-bottom:64px;
+  }
+  header.top{
+    padding:18px 16px 14px;
+    background:var(--accent);
+    color:#fff;
+  }
+  header.top .total-label{font-size:13px;opacity:.85;}
+  header.top .total-value{font-size:30px;font-weight:700;margin-top:2px;}
+  header.top .total-sub{font-size:12px;opacity:.8;margin-top:4px;}
+
+  main{flex:1;padding:14px 14px 24px;}
+
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:14px;
+    margin-bottom:12px;
+    box-shadow:0 1px 2px rgba(0,0,0,0.04);
+  }
+  .card h3{margin:0 0 8px;font-size:15px;}
+  .section-title{
+    font-size:13px;
+    color:var(--muted);
+    margin:18px 4px 8px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+  .row{display:flex;justify-content:space-between;align-items:center;}
+  .row + .row{margin-top:6px;}
+  .name{font-weight:600;font-size:15px;}
+  .sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .amount{font-weight:700;font-size:16px;}
+  .amount.small{font-size:13px;font-weight:500;color:var(--muted);}
+
+  .pill-btn{
+    border:none;
+    background:var(--accent);
+    color:#fff;
+    border-radius:10px;
+    padding:8px 12px;
+    font-size:13px;
+    font-weight:600;
+  }
+  .pill-btn.ghost{
+    background:var(--accent-light);
+    color:var(--accent);
+  }
+  .pill-btn.danger{background:var(--danger);}
+  .icon-btn{
+    border:none;background:none;color:var(--muted);font-size:18px;padding:4px 6px;
+  }
+
+  .empty{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    padding:24px 10px;
+  }
+
+  .progress-bar{
+    height:8px;
+    border-radius:5px;
+    background:#eceff1;
+    overflow:hidden;
+    margin-top:8px;
+  }
+  .progress-bar > div{
+    height:100%;
+    background:var(--accent);
+  }
+  .progress-bar > div.over{background:var(--warn);}
+
+  .fab{
+    position:fixed;
+    right:50%;
+    bottom:76px;
+    transform:translateX(167px);
+    width:48px;height:48px;
+    border-radius:50%;
+    background:var(--accent);
+    color:#fff;
+    font-size:26px;
+    border:none;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+    display:flex;align-items:center;justify-content:center;
+  }
+  @media (max-width:480px){
+    .fab{right:16px;transform:none;}
+  }
+
+  nav.tabbar{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    background:#fff;
+    border-top:1px solid #eee;
+    display:flex;
+    max-width:480px;
+    margin:0 auto;
+  }
+  nav.tabbar button{
+    flex:1;
+    border:none;background:none;
+    padding:10px 0 8px;
+    font-size:11px;
+    color:var(--muted);
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+  }
+  nav.tabbar button .ic{font-size:18px;}
+  nav.tabbar button.active{color:var(--accent);font-weight:600;}
+
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.45);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:50;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-sheet{
+    background:#fff;
+    width:100%;
+    max-width:480px;
+    border-radius:18px 18px 0 0;
+    padding:18px 18px 28px;
+    max-height:85vh;
+    overflow-y:auto;
+  }
+  .modal-sheet h2{margin:0 0 14px;font-size:17px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+  .field input, .field select{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid #e0e2e6;
+    font-size:15px;
+    background:#fafbfc;
+  }
+  .modal-actions{display:flex;gap:10px;margin-top:16px;}
+  .modal-actions button{flex:1;padding:11px 0;border-radius:10px;border:none;font-size:14px;font-weight:600;}
+  .modal-actions .cancel{background:#f0f1f3;color:var(--text);}
+  .modal-actions .submit{background:var(--accent);color:#fff;}
+
+  .link-text{color:var(--accent);font-size:13px;font-weight:600;background:none;border:none;padding:0;}
+  .file-row{display:flex;gap:10px;}
+  .file-row label{flex:1;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="total-label">资产总览(折算为 <span id="baseCurrencyLabel">-</span>)</div>
+    <div class="total-value" id="totalValue">0</div>
+    <div class="total-sub" id="goalAlert"></div>
+  </header>
+  <main id="view"></main>
+  <button class="fab" id="fabBtn">+</button>
+  <nav class="tabbar">
+    <button data-tab="overview" class="active"><span class="ic">&#9673;</span>总览</button>
+    <button data-tab="categories"><span class="ic">&#9636;</span>分类</button>
+    <button data-tab="goals"><span class="ic">&#9733;</span>目标</button>
+    <button data-tab="settings"><span class="ic">&#9881;</span>设置</button>
+  </nav>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-sheet" id="modalSheet"></div>
+</div>
+
+<input type="file" id="importFile" accept="application/json" style="display:none">
+
+<script>
+/* ---------- 数据层 ---------- */
+const STORAGE_KEY = 'budgetAppData_v1';
+
+function defaultState(){
+  return {
+    baseCurrency: 'CNY',
+    rates: { CNY: 1 }, // 1 单位该币种 = rates[code] 个 base currency
+    categories: [],
+    goals: []
+  };
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const data = JSON.parse(raw);
+    if(!data.rates) data.rates = { CNY: 1 };
+    if(!data.rates[data.baseCurrency]) data.rates[data.baseCurrency] = 1;
+    return data;
+  }catch(e){
+    return defaultState();
+  }
+}
+
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+let state = load();
+let activeTab = 'overview';
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function ensureRate(code){
+  if(!state.rates[code]) state.rates[code] = code === state.baseCurrency ? 1 : 1;
+}
+
+function toBase(amount, currency){
+  const rate = state.rates[currency] !== undefined ? state.rates[currency] : 1;
+  return amount * rate;
+}
+
+function fmt(n){
+  return (Math.round(n*100)/100).toLocaleString('zh-CN',{maximumFractionDigits:2});
+}
+
+/* ---------- 渲染 ---------- */
+function render(){
+  document.getElementById('baseCurrencyLabel').textContent = state.baseCurrency;
+  const total = state.categories.reduce((sum,c)=> sum + toBase(c.balance, c.currency), 0);
+  document.getElementById('totalValue').textContent = fmt(total) + ' ' + state.baseCurrency;
+
+  // 目标提醒：找最近 1 个未达成目标
+  const upcoming = state.goals
+    .map(g=>computeGoal(g))
+    .filter(g=>g.shortfall>0)
+    .sort((a,b)=>a.monthsRemaining-b.monthsRemaining)[0];
+  document.getElementById('goalAlert').textContent = upcoming
+    ? `最近目标:"${upcoming.name}" 还差 ${fmt(upcoming.shortfall)} ${state.baseCurrency}，${upcoming.monthsRemaining<=0?'已到期':'剩 '+upcoming.monthsRemaining+' 个月'}`
+    : (state.goals.length ? '所有目标已达成 🎉' : '');
+
+  document.querySelectorAll('nav.tabbar button').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.tab===activeTab);
+  });
+
+  const view = document.getElementById('view');
+  if(activeTab==='overview') view.innerHTML = renderOverview();
+  else if(activeTab==='categories') view.innerHTML = renderCategories();
+  else if(activeTab==='goals') view.innerHTML = renderGoals();
+  else if(activeTab==='settings') view.innerHTML = renderSettings();
+
+  document.getElementById('fabBtn').style.display = (activeTab==='settings') ? 'none' : 'flex';
+}
+
+function renderOverview(){
+  if(state.categories.length===0 && state.goals.length===0){
+    return `<div class="empty">还没有数据。<br>点右下角 “+” 添加第一个分类吧。</div>`;
+  }
+  let html = '';
+  if(state.categories.length){
+    html += `<div class="section-title">分类余额</div><div class="card">`;
+    state.categories.forEach((c,i)=>{
+      html += `<div class="row">
+        <div>
+          <div class="name">${escapeHtml(c.name)}</div>
+          <div class="sub">≈ ${fmt(toBase(c.balance,c.currency))} ${state.baseCurrency}</div>
+        </div>
+        <div class="amount">${fmt(c.balance)} ${c.currency}</div>
+      </div>${i<state.categories.length-1?'<hr style="border:none;border-top:1px solid #f0f1f3;margin:8px 0">':''}`;
+    });
+    html += `</div>`;
+  }
+  if(state.goals.length){
+    html += `<div class="section-title">目标进度</div>`;
+    state.goals.forEach(g=>{
+      html += goalCardHtml(g);
+    });
+  }
+  return html;
+}
+
+function renderCategories(){
+  if(state.categories.length===0){
+    return `<div class="empty">还没有分类。<br>点右下角 “+” 新建一个分类(比如：日常 / 旅游 / 应急金)。</div>`;
+  }
+  return state.categories.map(c=>`
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="name">${escapeHtml(c.name)}</div>
+          <div class="sub">≈ ${fmt(toBase(c.balance,c.currency))} ${state.baseCurrency}</div>
+        </div>
+        <div class="amount">${fmt(c.balance)} ${c.currency}</div>
+      </div>
+      <div class="modal-actions" style="margin-top:12px;">
+        <button class="pill-btn ghost" onclick="openAddMoneyModal('${c.id}')">存入/支出</button>
+        <button class="pill-btn ghost" onclick="openEditCategoryModal('${c.id}')">编辑</button>
+        <button class="pill-btn danger" onclick="deleteCategory('${c.id}')">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function computeGoal(g){
+  const targetBase = toBase(g.targetAmount, g.currency);
+  let savedBase;
+  if(g.linkedCategoryId){
+    const cat = state.categories.find(c=>c.id===g.linkedCategoryId);
+    savedBase = cat ? toBase(cat.balance, cat.currency) : 0;
+  }else{
+    savedBase = toBase(g.manualSaved||0, g.currency);
+  }
+  const shortfall = targetBase - savedBase;
+  const now = new Date();
+  const [dy, dm] = g.deadline.split('-').map(Number);
+  const monthsRemaining = (dy - now.getFullYear())*12 + (dm - (now.getMonth()+1));
+  const monthlyNeeded = shortfall>0 ? shortfall/Math.max(monthsRemaining,1) : 0;
+  return {
+    ...g, targetBase, savedBase, shortfall, monthsRemaining, monthlyNeeded,
+    pct: targetBase>0 ? Math.min(100, Math.max(0,(savedBase/targetBase)*100)) : 0
+  };
+}
+
+function goalCardHtml(gRaw){
+  const g = computeGoal(gRaw);
+  const linkedCat = g.linkedCategoryId ? state.categories.find(c=>c.id===g.linkedCategoryId) : null;
+  return `<div class="card">
+    <div class="row">
+      <div class="name">${escapeHtml(g.name)}</div>
+      <div class="amount small">${g.deadline} 前</div>
+    </div>
+    <div class="sub">目标 ${fmt(g.targetAmount)} ${g.currency}${linkedCat?` ・ 关联分类「${escapeHtml(linkedCat.name)}」`:''}</div>
+    <div class="progress-bar"><div class="${g.shortfall<=0?'':''}" style="width:${g.pct}%"></div></div>
+    <div class="row" style="margin-top:8px;">
+      <div class="sub">已存 ≈ ${fmt(g.savedBase)} / ${fmt(g.targetBase)} ${state.baseCurrency}</div>
+      <div class="amount small" style="color:${g.shortfall>0?'#d1453d':'#2f7d6b'}">
+        ${g.shortfall>0 ? '还差 '+fmt(g.shortfall)+' '+state.baseCurrency : '已达成 ✓'}
+      </div>
+    </div>
+    ${g.shortfall>0 ? `<div class="sub">${g.monthsRemaining<=0?'已到期，建议尽快补足':'剩 '+g.monthsRemaining+' 个月，平均每月需存 '+fmt(g.monthlyNeeded)+' '+state.baseCurrency}</div>` : ''}
+    <div class="modal-actions" style="margin-top:12px;">
+      <button class="pill-btn ghost" onclick="openEditGoalModal('${g.id}')">编辑</button>
+      <button class="pill-btn danger" onclick="deleteGoal('${g.id}')">删除</button>
+    </div>
+  </div>`;
+}
+
+function renderGoals(){
+  if(state.goals.length===0){
+    return `<div class="empty">还没有目标。<br>点右下角 “+” 设一个目标，比如 “B 项目 / 10000 元 / 2026-12”。</div>`;
+  }
+  return state.goals.map(g=>goalCardHtml(g)).join('');
+}
+
+function renderSettings(){
+  const currencies = Object.keys(state.rates);
+  return `
+    <div class="card">
+      <h3>本位币(用于总览折算)</h3>
+      <div class="field">
+        <select id="baseCurrencySelect" onchange="changeBaseCurrency(this.value)">
+          ${currencies.map(c=>`<option value="${c}" ${c===state.baseCurrency?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <h3>汇率设置（1 单位 = 多少本位币）</h3>
+      ${currencies.filter(c=>c!==state.baseCurrency).map(c=>`
+        <div class="row" style="margin-bottom:8px;">
+          <div class="name">${c}</div>
+          <input style="width:110px;text-align:right;padding:6px 8px;border-radius:8px;border:1px solid #e0e2e6;"
+            type="number" step="0.0001" value="${state.rates[c]}"
+            onchange="updateRate('${c}', this.value)">
+        </div>
+      `).join('') || '<div class="sub">暂无其他币种，添加分类/目标时可新增。</div>'}
+      <button class="link-text" style="margin-top:6px;" onclick="openAddCurrencyModal()">+ 添加币种</button>
+    </div>
+    <div class="card">
+      <h3>数据备份</h3>
+      <div class="modal-actions" style="margin-top:0;">
+        <button class="pill-btn ghost" onclick="exportData()">导出备份</button>
+        <button class="pill-btn ghost" onclick="document.getElementById('importFile').click()">导入备份</button>
+      </div>
+      <div class="sub" style="margin-top:8px;">数据只保存在本机浏览器中，清除浏览器数据会丢失，建议偶尔导出备份。</div>
+    </div>
+    <div class="card">
+      <button class="pill-btn danger" style="width:100%;" onclick="clearAllData()">清空所有数据</button>
+    </div>
+  `;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ---------- 弹窗 ---------- */
+function openModal(html){
+  document.getElementById('modalSheet').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+document.getElementById('modalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id==='modalOverlay') closeModal();
+});
+
+function currencyOptions(selected){
+  const codes = Object.keys(state.rates);
+  return codes.map(c=>`<option value="${c}" ${c===selected?'selected':''}>${c}</option>`).join('');
+}
+
+function openAddCategoryModal(){
+  openModal(`
+    <h2>新建分类</h2>
+    <div class="field"><label>名称</label><input id="f_name" placeholder="例如：日常 / 旅游基金"></div>
+    <div class="field"><label>初始余额</label><input id="f_balance" type="number" step="0.01" value="0"></div>
+    <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(state.baseCurrency)}</select></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">取消</button>
+      <button class="submit" onclick="submitAddCategory()">保存</button>
+    </div>
+  `);
+}
+function submitAddCategory(){
+  const name = document.getElementById('f_name').value.trim();
+  const balance = parseFloat(document.getElementById('f_balance').value) || 0;
+  const currency = document.getElementById('f_currency').value;
+  if(!name) return alert('请输入名称');
+  state.categories.push({id:uid(), name, balance, currency});
+  save(); closeModal(); render();
+}
+
+function openEditCategoryModal(id){
+  const c = state.categories.find(x=>x.id===id);
+  if(!c) return;
+  openModal(`
+    <h2>编辑分类</h2>
+    <div class="field"><label>名称</label><input id="f_name" value="${escapeHtml(c.name)}"></div>
+    <div class="field"><label>余额</label><input id="f_balance" type="number" step="0.01" value="${c.balance}"></div>
+    <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(c.currency)}</select></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">取消</button>
+      <button class="submit" onclick="submitEditCategory('${id}')">保存</button>
+    </div>
+  `);
+}
+function submitEditCategory(id){
+  const c = state.categories.find(x=>x.id===id);
+  c.name = document.getElementById('f_name').value.trim() || c.name;
+  c.balance = parseFloat(document.getElementById('f_balance').value) || 0;
+  c.currency = document.getElementById('f_currency').value;
+  save(); closeModal(); render();
+}
+function deleteCategory(id){
+  if(!confirm('确定删除该分类吗？')) return;
+  state.categories = state.categories.filter(x=>x.id!==id);
+  state.goals.forEach(g=>{ if(g.linkedCategoryId===id) g.linkedCategoryId=null; });
+  save(); render();
+}
+
+function openAddMoneyModal(id){
+  const c = state.categories.find(x=>x.id===id);
+  openModal(`
+    <h2>${escapeHtml(c.name)} - 存入/支出</h2>
+    <div class="field"><label>金额（支出请填负数）</label><input id="f_amount" type="number" step="0.01" placeholder="例如 500 或 -200"></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">取消</button>
+      <button class="submit" onclick="submitAddMoney('${id}')">确定</button>
+    </div>
+  `);
+}
+function submitAddMoney(id){
+  const c = state.categories.find(x=>x.id===id);
+  const amt = parseFloat(document.getElementById('f_amount').value);
+  if(isNaN(amt)) return alert('请输入金额');
+  c.balance += amt;
+  save(); closeModal(); render();
+}
+
+function openAddGoalModal(){
+  openModal(`
+    <h2>新建目标</h2>
+    <div class="field"><label>目标名称</label><input id="f_name" placeholder="例如：B 项目"></div>
+    <div class="field"><label>目标金额</label><input id="f_amount" type="number" step="0.01" value="0"></div>
+    <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(state.baseCurrency)}</select></div>
+    <div class="field"><label>需要凑齐的月份</label><input id="f_deadline" type="month"></div>
+    <div class="field"><label>关联分类（可选，已存金额自动取该分类余额）</label>
+      <select id="f_linked">
+        <option value="">不关联，手动填写已存金额</option>
+        ${state.categories.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field" id="f_manualSavedWrap"><label>已存金额</label><input id="f_manualSaved" type="number" step="0.01" value="0"></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">取消</button>
+      <button class="submit" onclick="submitAddGoal()">保存</button>
+    </div>
+  `);
+}
+function submitAddGoal(){
+  const name = document.getElementById('f_name').value.trim();
+  const targetAmount = parseFloat(document.getElementById('f_amount').value) || 0;
+  const currency = document.getElementById('f_currency').value;
+  const deadline = document.getElementById('f_deadline').value;
+  const linkedCategoryId = document.getElementById('f_linked').value || null;
+  const manualSaved = parseFloat(document.getElementById('f_manualSaved').value) || 0;
+  if(!name) return alert('请输入目标名称');
+  if(!deadline) return alert('请选择月份');
+  state.goals.push({id:uid(), name, targetAmount, currency, deadline, linkedCategoryId, manualSaved});
+  save(); closeModal(); render();
+}
+
+function openEditGoalModal(id){
+  const g = state.goals.find(x=>x.id===id);
+  if(!g) return;
+  openModal(`
+    <h2>编辑目标</h2>
+    <div class="field"><label>目标名称</label><input id="f_name" value="${escapeHtml(g.name)}"></div>
+    <div class="field"><label>目标金额</label><input id="f_amount" type="number" step="0.01" value="${g.targetAmount}"></div>
+    <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(g.currency)}</select></div>
+    <div class="field"><label>需要凑齐的月份</label><input id="f_deadline" type="month" value="${g.deadline}"></div>
+    <div class="field"><label>关联分类</label>
+      <select id="f_linked">
+        <option value="">不关联，手动填写已存金额</option>
+        ${state.categories.map(c=>`<option value="${c.id}" ${g.linkedCategoryId===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>已存金额（未关联分类时使用）</label><input id="f_manualSaved" type="number" step="0.01" value="${g.manualSaved||0}"></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">取消</button>
+      <button class="submit" onclick="submitEditGoal('${id}')">保存</button>
+    </div>
+  `);
+}
+function submitEditGoal(id){
+  const g = state.goals.find(x=>x.id===id);
+  g.name = document.getElementById('f_name').value.trim() || g.name;
+  g.targetAmount = parseFloat(document.getElementById('f_amount').value) || 0;
+  g.currency = document.getElementById('f_currency').value;
+  g.deadline = document.getElementById('f_deadline').value || g.deadline;
+  g.linkedCategoryId = document.getElementById('f_linked').value || null;
+  g.manualSaved = parseFloat(document.getElementById('f_manualSaved').value) || 0;
+  save(); closeModal(); render();
+}
+function deleteGoal(id){
+  if(!confirm('确定删除该目标吗？')) return;
+  state.goals = state.goals.filter(x=>x.id!==id);
+  save(); render();
+}
+
+function openAddCurrencyModal(){
+  openModal(`
+    <h2>添加币种</h2>
+    <div class="field"><label>币种代码（如 USD、JPY、EUR）</label><input id="f_code" placeholder="USD" style="text-transform:uppercase;"></div>
+    <div class="field"><label>汇率（1 单位 = 多少 ${state.baseCurrency}）</label><input id="f_rate" type="number" step="0.0001" value="1"></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">取消</button>
+      <button class="submit" onclick="submitAddCurrency()">保存</button>
+    </div>
+  `);
+}
+function submitAddCurrency(){
+  const code = document.getElementById('f_code').value.trim().toUpperCase();
+  const rate = parseFloat(document.getElementById('f_rate').value);
+  if(!code) return alert('请输入币种代码');
+  if(isNaN(rate) || rate<=0) return alert('请输入有效汇率');
+  state.rates[code] = rate;
+  save(); closeModal(); render();
+}
+
+function updateRate(code, value){
+  const rate = parseFloat(value);
+  if(isNaN(rate) || rate<=0) return;
+  state.rates[code] = rate;
+  save();
+}
+
+function changeBaseCurrency(newBase){
+  ensureRate(newBase);
+  const pivot = state.rates[newBase] || 1;
+  Object.keys(state.rates).forEach(code=>{
+    state.rates[code] = state.rates[code] / pivot;
+  });
+  state.rates[newBase] = 1;
+  state.baseCurrency = newBase;
+  save(); render();
+}
+
+/* ---------- 备份 ---------- */
+function exportData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `budget-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+document.getElementById('importFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data.categories || !data.goals || !data.rates) throw new Error('格式不对');
+      state = data;
+      save(); render();
+      alert('导入成功');
+    }catch(err){
+      alert('导入失败：文件格式不正确');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+function clearAllData(){
+  if(!confirm('确定要清空所有数据吗？此操作无法撤销，建议先导出备份。')) return;
+  state = defaultState();
+  save(); render();
+}
+
+/* ---------- 事件绑定 ---------- */
+document.querySelectorAll('nav.tabbar button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{ activeTab = btn.dataset.tab; render(); });
+});
+document.getElementById('fabBtn').addEventListener('click', ()=>{
+  if(activeTab==='goals') openAddGoalModal();
+  else openAddCategoryModal();
+});
+
+render();
+</script>
+</body>
+</html>
