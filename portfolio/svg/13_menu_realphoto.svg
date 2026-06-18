@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2000" viewBox="0 0 1600 2000">
+  <defs>
+    <filter id="photoShadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#1a0e05" flood-opacity="0.45"/></filter>
+  </defs>
+  <rect width="1600" height="2000" fill="#fbf3e3"/>
+  <rect x="26" y="26" width="1548" height="1948" fill="none" stroke="#c9893c" stroke-width="2"/>
+  <g transform="translate(36,36) rotate(0)">
+      <path d="M0,0 L90,0 L90,14 L14,14 L14,90 L0,90 Z" fill="#c9893c"/>
+      <circle cx="40" cy="40" r="6" fill="#c9893c"/></g>
+  <g transform="translate(1564,36) rotate(90)">
+      <path d="M0,0 L90,0 L90,14 L14,14 L14,90 L0,90 Z" fill="#c9893c"/>
+      <circle cx="40" cy="40" r="6" fill="#c9893c"/></g>
+  <g transform="translate(1564,1964) rotate(180)">
+      <path d="M0,0 L90,0 L90,14 L14,14 L14,90 L0,90 Z" fill="#c9893c"/>
+      <circle cx="40" cy="40" r="6" fill="#c9893c"/></g>
+  <g transform="translate(36,1964) rotate(270)">
+      <path d="M0,0 L90,0 L90,14 L14,14 L14,90 L0,90 Z" fill="#c9893c"/>
+      <circle cx="40" cy="40" r="6" fill="#c9893c"/></g>
+
+  <rect x="60" y="60" width="1480" height="200" fill="#8c1f1a"/>
+  <text x="800.0" y="125" font-family="Noto Sans CJK TC" font-weight="400" font-size="22" letter-spacing="6" fill="#e9c98a" text-anchor="middle">EST. 1968 · HONG KONG STYLE</text>
+  <text x="800.0" y="205" font-family="Noto Sans CJK TC Black" font-weight="900" font-size="92" fill="#f3e3bd" text-anchor="middle">龍鳳冰室 LUNG FUNG CAFE</text>
+
+  <g filter="url(#photoShadow)">
+    <image href="../photos/hero_main.jpg" x="60" y="290" width="1480" height="650" preserveAspectRatio="none"/>
+  </g>
+  <rect x="60" y="290" width="1480" height="650" fill="none" stroke="#c9893c" stroke-width="4"/>
+
+  <g filter="url(#photoShadow)">
+    <rect x="1120" y="520" width="360" height="500" fill="#fbf3e3"/>
+    <image href="../photos/hero_inset.jpg" x="1130" y="530" width="340" height="480" preserveAspectRatio="none"/>
+  </g>
+  <rect x="1130" y="530" width="340" height="480" fill="none" stroke="#c9893c" stroke-width="3"/>
+
+  
+    <rect x="60" y="1070" width="460.0" height="64" fill="#8c1f1a"/>
+    <text x="84" y="1112" font-family="Noto Sans CJK TC Black" font-weight="900" font-size="28" fill="#f3e3bd">點 心</text>
+    <text x="500.0" y="1112" font-family="Noto Sans CJK TC" font-weight="700" font-size="16" letter-spacing="2" fill="#c9893c" text-anchor="end">DIM SUM</text>
+    
+    <g transform="translate(60,1170)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">蝦餃</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$38</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">HAR GOW</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Steamed shrimp dumpling, bamboo shoot</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(60,1262)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">燒賣</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$35</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">SIU MAI</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Pork &amp; shrimp dumpling, crab roe top</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(60,1354)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">腸粉</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$32</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">CHEUNG FUN</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Silky rice noodle roll, soy &amp; sesame</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(60,1446)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">叉燒包</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$30</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">CHAR SIU BAO</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Fluffy steamed bun, BBQ pork filling</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(60,1538)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">蘿蔔糕</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$28</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">TURNIP CAKE</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Pan-fried radish cake, XO sauce</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(60,1630)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">鳳爪</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$34</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">PHOENIX TALONS</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Braised chicken feet, black bean sauce</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <rect x="570.0" y="1070" width="460.0" height="64" fill="#8c1f1a"/>
+    <text x="594.0" y="1112" font-family="Noto Sans CJK TC Black" font-weight="900" font-size="28" fill="#f3e3bd">粥麵飯 · 燒味</text>
+    <text x="1010.0" y="1112" font-family="Noto Sans CJK TC" font-weight="700" font-size="16" letter-spacing="2" fill="#c9893c" text-anchor="end">RICE &amp; ROAST</text>
+    
+    <g transform="translate(570.0,1170)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">燒鵲飯</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$58</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">ROAST DUCK RICE</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Crispy skin roast duck on steamed rice</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(570.0,1262)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">叉燒飯</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$52</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">CHAR SIU RICE</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Honey-glazed BBQ pork on steamed rice</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(570.0,1354)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">雲吞麵</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$42</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">WONTON NOODLES</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Shrimp wontons, egg noodles, clear broth</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(570.0,1446)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">干炒牛河</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$56</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">BEEF CHOW FUN</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Wok-fried rice noodles, beef &amp; bean sprouts</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(570.0,1538)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">皮蛋瘦肉粥</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$38</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">CENTURY EGG CONGEE</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Silky rice congee, pork &amp; preserved egg</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(570.0,1630)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">星洲炒米</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$48</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">SINGAPORE NOODLES</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Curry-spiced rice vermicelli, prawns &amp; egg</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <rect x="1080.0" y="1070" width="460.0" height="64" fill="#8c1f1a"/>
+    <text x="1104.0" y="1112" font-family="Noto Sans CJK TC Black" font-weight="900" font-size="28" fill="#f3e3bd">飲品 · 甜品</text>
+    <text x="1520.0" y="1112" font-family="Noto Sans CJK TC" font-weight="700" font-size="16" letter-spacing="2" fill="#c9893c" text-anchor="end">DRINKS &amp; DESSERTS</text>
+    
+    <g transform="translate(1080.0,1170)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">港式奶茶</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$22</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">HK MILK TEA</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Silk-stocking brewed black tea &amp; evaporated milk</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(1080.0,1262)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">檸檬茶</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$20</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">LEMON TEA</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Hot or iced, fresh lemon slices</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(1080.0,1354)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">鴛鴦</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$24</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">YIN YEUNG</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Coffee &amp; tea blend, evaporated milk</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(1080.0,1446)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">蛋撻</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$14</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">EGG TART</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Flaky crust, warm silky custard</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(1080.0,1538)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">楊枝甘露</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$32</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">MANGO SAGO POMELO</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Chilled mango cream, sago &amp; pomelo</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(1080.0,1630)">
+      <text x="0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="24" fill="#4a2d18">凍檸水</text>
+      <text x="460.0" y="0" font-family="Noto Sans CJK TC" font-weight="700" font-size="22" fill="#8c1f1a" text-anchor="end">$18</text>
+      <text x="0" y="26" font-family="Noto Sans CJK TC" font-weight="400" font-size="14" letter-spacing="1" fill="#c9893c">ICED LEMON WATER</text>
+      <text x="0" y="49" font-family="Noto Sans CJK TC" font-weight="400" font-size="13" fill="#8a7460">Refreshing iced water, fresh lemon</text>
+      <line x1="0" y1="68" x2="460.0" y2="68" stroke="#e0cda0" stroke-width="1.5"/>
+    </g>
+
+  <line x1="80" y1="1762" x2="1520" y2="1762" stroke="#c9893c" stroke-width="1.5"/>
+  <text x="800.0" y="1812" font-family="Noto Sans CJK TC" font-weight="700" font-size="26" letter-spacing="3" fill="#8c1f1a" text-anchor="middle">港 式 茶 餐 廳</text>
+  <text x="800.0" y="1852" font-family="Noto Sans CJK TC" font-weight="400" font-size="19" fill="#4a2d18" text-anchor="middle">SHOP 8, KING&#39;S ROAD, NORTH POINT, HONG KONG · +852 2345 6789</text>
+</svg>

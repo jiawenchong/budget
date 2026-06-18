@@ -13,5 +13,5 @@ def save(name, svg, scale=2):
     png_path = os.path.join(OUT_PNG, f"{name}.png")
     with open(svg_path, "w", encoding="utf-8") as f:
         f.write(svg)
-    cairosvg.svg2png(url=svg_path, write_to=png_path, scale=scale)
+    cairosvg.svg2png(url=svg_path, write_to=png_path, scale=scale, unsafe=True)
     print("rendered", png_path)
