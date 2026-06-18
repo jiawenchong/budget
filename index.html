@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>记账本</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="记账本">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#2f7d6b">
 <style>
   :root{
     --accent:#2f7d6b;
@@ -194,6 +201,7 @@
     <button data-tab="overview" class="active"><span class="ic">&#9673;</span>总览</button>
     <button data-tab="categories"><span class="ic">&#9636;</span>分类</button>
     <button data-tab="goals"><span class="ic">&#9733;</span>目标</button>
+    <button data-tab="history"><span class="ic">&#8634;</span>历史</button>
     <button data-tab="settings"><span class="ic">&#9881;</span>设置</button>
   </nav>
 </div>
@@ -220,7 +228,8 @@ function defaultState(){
     secondaryCurrency: 'MYR',
     rates: { NTD: 1, MYR: 8 }, // 1 单位该币种 = rates[code] 个 base currency
     categories: [],
-    goals: []
+    goals: [],
+    history: []
   };
 }
 
@@ -232,6 +241,7 @@ function load(){
     if(!data.rates) data.rates = { NTD: 1, MYR: 8 };
     if(!data.rates[data.baseCurrency]) data.rates[data.baseCurrency] = 1;
     if(!data.secondaryCurrency) data.secondaryCurrency = data.rates.MYR ? 'MYR' : data.baseCurrency;
+    if(!data.history) data.history = [];
     data.categories.forEach(c=>{
       if(c.monthlyPlan===undefined) c.monthlyPlan = 0;
       if(!c.notes) c.notes = [];
@@ -240,6 +250,14 @@ function load(){
   }catch(e){
     return defaultState();
   }
+}
+
+function addHistoryEntry(entry){
+  state.history.unshift({
+    id: uid(),
+    date: new Date().toISOString().slice(0,10),
+    ...entry
+  });
 }
 
 function save(){
@@ -319,9 +337,10 @@ function render(){
   if(activeTab==='overview') view.innerHTML = renderOverview();
   else if(activeTab==='categories') view.innerHTML = renderCategories();
   else if(activeTab==='goals') view.innerHTML = renderGoals();
+  else if(activeTab==='history') view.innerHTML = renderHistory();
   else if(activeTab==='settings') view.innerHTML = renderSettings();
 
-  document.getElementById('fabBtn').style.display = (activeTab==='settings') ? 'none' : 'flex';
+  document.getElementById('fabBtn').style.display = (activeTab==='settings' || activeTab==='history') ? 'none' : 'flex';
 }
 
 function renderOverview(){
@@ -429,6 +448,46 @@ function renderGoals(){
   return state.goals.map(g=>goalCardHtml(g)).join('');
 }
 
+const HISTORY_TYPE_LABEL = {deposit:'存入', expense:'支出', allocation:'本月分配', create:'新建分类'};
+
+function renderHistory(){
+  if(state.history.length===0){
+    return `<div class="empty">还没有历史记录。<br>存入/支出或本月分配后会自动记录在这里。</div>`;
+  }
+  let html = '';
+  let lastDate = null;
+  state.history.forEach(h=>{
+    if(h.date!==lastDate){
+      html += `<div class="section-title">${h.date}</div>`;
+      lastDate = h.date;
+    }
+    const parts = dualPartsForCurrency(Math.abs(h.amount), h.currency);
+    const sign = h.amount<0 ? '-' : '+';
+    const color = h.amount<0 ? 'var(--danger)' : 'var(--accent)';
+    html += `<div class="card">
+      <div class="row">
+        <div>
+          <div class="name">${escapeHtml(h.categoryName)}</div>
+          <div class="sub">${HISTORY_TYPE_LABEL[h.type]||h.type}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="amount" style="color:${color};">${sign}${parts.primary}</div>
+          ${parts.secondary?`<div class="sub">≈ ${parts.secondary}</div>`:''}
+        </div>
+      </div>
+      <div class="row" style="margin-top:6px;justify-content:flex-end;">
+        <button class="icon-btn" onclick="deleteHistoryEntry('${h.id}')">✕</button>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+function deleteHistoryEntry(id){
+  if(!confirm('确定删除这条历史记录吗？(不会影响分类余额)')) return;
+  state.history = state.history.filter(h=>h.id!==id);
+  save(); render();
+}
+
 function renderSettings(){
   const currencies = Object.keys(state.rates);
   return `
@@ -532,7 +591,11 @@ function submitAddCategory(){
   const currency = document.getElementById('f_currency').value;
   const monthlyPlan = parseFloat(document.getElementById('f_monthlyPlan').value) || 0;
   if(!name) return alert('请输入名称');
-  state.categories.push({id:uid(), name, balance, currency, monthlyPlan, notes:[]});
+  const newCat = {id:uid(), name, balance, currency, monthlyPlan, notes:[]};
+  state.categories.push(newCat);
+  if(balance!==0){
+    addHistoryEntry({type:'create', categoryId:newCat.id, categoryName:name, amount:balance, currency});
+  }
   save(); closeModal(); render();
 }
 
@@ -582,6 +645,7 @@ function submitAddMoney(id){
   const amt = parseFloat(document.getElementById('f_amount').value);
   if(isNaN(amt)) return alert('请输入金额');
   c.balance += amt;
+  addHistoryEntry({type: amt>=0?'deposit':'expense', categoryId:c.id, categoryName:c.name, amount:amt, currency:c.currency});
   save(); closeModal(); render();
 }
 
@@ -756,7 +820,10 @@ function confirmAllocation(){
   inputs.forEach(inp=>{
     const amt = parseFloat(inp.value)||0;
     const cat = state.categories.find(c=>c.id===inp.dataset.catid);
-    if(cat) cat.balance += amt;
+    if(cat && amt!==0){
+      cat.balance += amt;
+      addHistoryEntry({type:'allocation', categoryId:cat.id, categoryName:cat.name, amount:amt, currency:cat.currency});
+    }
   });
   save(); closeModal(); render();
 }
@@ -848,6 +915,12 @@ document.getElementById('fabBtn').addEventListener('click', ()=>{
 });
 
 render();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
