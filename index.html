@@ -185,6 +185,7 @@
   <header class="top">
     <div class="total-label">资产总览(折算为 <span id="baseCurrencyLabel">-</span>)</div>
     <div class="total-value" id="totalValue">0</div>
+    <div class="total-sub" id="totalSecondary"></div>
     <div class="total-sub" id="goalAlert"></div>
   </header>
   <main id="view"></main>
@@ -216,6 +217,7 @@ const CUSTOM_OPTION = '__custom__';
 function defaultState(){
   return {
     baseCurrency: 'NTD',
+    secondaryCurrency: 'MYR',
     rates: { NTD: 1, MYR: 8 }, // 1 单位该币种 = rates[code] 个 base currency
     categories: [],
     goals: []
@@ -229,6 +231,11 @@ function load(){
     const data = JSON.parse(raw);
     if(!data.rates) data.rates = { NTD: 1, MYR: 8 };
     if(!data.rates[data.baseCurrency]) data.rates[data.baseCurrency] = 1;
+    if(!data.secondaryCurrency) data.secondaryCurrency = data.rates.MYR ? 'MYR' : data.baseCurrency;
+    data.categories.forEach(c=>{
+      if(c.monthlyPlan===undefined) c.monthlyPlan = 0;
+      if(!c.notes) c.notes = [];
+    });
     return data;
   }catch(e){
     return defaultState();
@@ -257,19 +264,51 @@ function fmt(n){
   return (Math.round(n*100)/100).toLocaleString('zh-CN',{maximumFractionDigits:2});
 }
 
+function fromBase(baseAmount, currency){
+  const rate = state.rates[currency] !== undefined ? state.rates[currency] : 1;
+  return baseAmount / rate;
+}
+
+// 已是本位币金额时使用：{primary: 本位币, secondary: 次要币种换算}
+function dualPartsForBase(baseAmount){
+  const primary = `${fmt(baseAmount)} ${state.baseCurrency}`;
+  const secondary = state.secondaryCurrency === state.baseCurrency
+    ? ''
+    : `${fmt(fromBase(baseAmount, state.secondaryCurrency))} ${state.secondaryCurrency}`;
+  return { primary, secondary };
+}
+
+// 原始金额 + 币种时使用：{primary: 原币种, secondary: 本位币/次要币种换算}
+function dualPartsForCurrency(amount, currency){
+  const baseAmount = toBase(amount, currency);
+  const primary = `${fmt(amount)} ${currency}`;
+  const secondaryBits = [];
+  if(currency !== state.baseCurrency) secondaryBits.push(`${fmt(baseAmount)} ${state.baseCurrency}`);
+  if(state.secondaryCurrency !== currency && state.secondaryCurrency !== state.baseCurrency){
+    secondaryBits.push(`${fmt(fromBase(baseAmount, state.secondaryCurrency))} ${state.secondaryCurrency}`);
+  }
+  return { primary, secondary: secondaryBits.join(' ≈ ') };
+}
+function dualHtml(parts, cssClass){
+  return `<div class="${cssClass}">${parts.primary}</div>${parts.secondary?`<div class="sub" style="text-align:right;">≈ ${parts.secondary}</div>`:''}`;
+}
+
 /* ---------- 渲染 ---------- */
 function render(){
   document.getElementById('baseCurrencyLabel').textContent = state.baseCurrency;
   const total = state.categories.reduce((sum,c)=> sum + toBase(c.balance, c.currency), 0);
-  document.getElementById('totalValue').textContent = fmt(total) + ' ' + state.baseCurrency;
+  const totalParts = dualPartsForBase(total);
+  document.getElementById('totalValue').textContent = totalParts.primary;
+  document.getElementById('totalSecondary').textContent = totalParts.secondary ? `≈ ${totalParts.secondary}` : '';
 
   // 目标提醒：找最近 1 个未达成目标
   const upcoming = state.goals
     .map(g=>computeGoal(g))
     .filter(g=>g.shortfall>0)
     .sort((a,b)=>a.monthsRemaining-b.monthsRemaining)[0];
+  const upcomingShortfall = upcoming ? dualPartsForBase(upcoming.shortfall) : null;
   document.getElementById('goalAlert').textContent = upcoming
-    ? `最近目标:"${upcoming.name}" 还差 ${fmt(upcoming.shortfall)} ${state.baseCurrency}，${upcoming.monthsRemaining<=0?'已到期':'剩 '+upcoming.monthsRemaining+' 个月'}`
+    ? `最近目标:"${upcoming.name}" 还差 ${upcomingShortfall.primary}${upcomingShortfall.secondary?'（≈'+upcomingShortfall.secondary+'）':''}，${upcoming.monthsRemaining<=0?'已到期':'剩 '+upcoming.monthsRemaining+' 个月'}`
     : (state.goals.length ? '所有目标已达成 🎉' : '');
 
   document.querySelectorAll('nav.tabbar button').forEach(btn=>{
@@ -286,19 +325,16 @@ function render(){
 }
 
 function renderOverview(){
+  let html = `<button class="pill-btn" style="width:100%;margin-bottom:14px;" onclick="openAllocateModal()">本月分配</button>`;
   if(state.categories.length===0 && state.goals.length===0){
-    return `<div class="empty">还没有数据。<br>点右下角 “+” 添加第一个分类吧。</div>`;
+    return html + `<div class="empty">还没有数据。<br>点右下角 “+” 添加第一个分类吧。</div>`;
   }
-  let html = '';
   if(state.categories.length){
     html += `<div class="section-title">分类余额</div><div class="card">`;
     state.categories.forEach((c,i)=>{
       html += `<div class="row">
-        <div>
-          <div class="name">${escapeHtml(c.name)}</div>
-          <div class="sub">≈ ${fmt(toBase(c.balance,c.currency))} ${state.baseCurrency}</div>
-        </div>
-        <div class="amount">${fmt(c.balance)} ${c.currency}</div>
+        <div class="name">${escapeHtml(c.name)}</div>
+        <div>${dualHtml(dualPartsForCurrency(c.balance, c.currency), 'amount')}</div>
       </div>${i<state.categories.length-1?'<hr style="border:none;border-top:1px solid #f0f1f3;margin:8px 0">':''}`;
     });
     html += `</div>`;
@@ -316,22 +352,24 @@ function renderCategories(){
   if(state.categories.length===0){
     return `<div class="empty">还没有分类。<br>点右下角 “+” 新建一个分类(比如：日常 / 旅游 / 应急金)。</div>`;
   }
-  return state.categories.map(c=>`
+  return state.categories.map(c=>{
+    const notesSum = (c.notes||[]).reduce((s,n)=>s+n.amount,0);
+    return `
     <div class="card">
       <div class="row">
-        <div>
-          <div class="name">${escapeHtml(c.name)}</div>
-          <div class="sub">≈ ${fmt(toBase(c.balance,c.currency))} ${state.baseCurrency}</div>
-        </div>
-        <div class="amount">${fmt(c.balance)} ${c.currency}</div>
+        <div class="name">${escapeHtml(c.name)}</div>
+        <div>${dualHtml(dualPartsForCurrency(c.balance, c.currency), 'amount')}</div>
       </div>
+      ${c.notes && c.notes.length ? `<div class="sub" style="margin-top:4px;">明细 ${c.notes.length} 项 ・ 合计 ${fmt(notesSum)} ${c.currency}</div>` : ''}
+      ${c.monthlyPlan>0 ? `<div class="sub">每月固定分配 ${fmt(c.monthlyPlan)} ${c.currency}</div>` : ''}
       <div class="modal-actions" style="margin-top:12px;">
         <button class="pill-btn ghost" onclick="openAddMoneyModal('${c.id}')">存入/支出</button>
+        <button class="pill-btn ghost" onclick="openCategoryNotesModal('${c.id}')">明细备忘</button>
         <button class="pill-btn ghost" onclick="openEditCategoryModal('${c.id}')">编辑</button>
         <button class="pill-btn danger" onclick="deleteCategory('${c.id}')">删除</button>
       </div>
     </div>
-  `).join('');
+  `;}).join('');
 }
 
 function computeGoal(g){
@@ -357,20 +395,26 @@ function computeGoal(g){
 function goalCardHtml(gRaw){
   const g = computeGoal(gRaw);
   const linkedCat = g.linkedCategoryId ? state.categories.find(c=>c.id===g.linkedCategoryId) : null;
+  const targetParts = dualPartsForCurrency(g.targetAmount, g.currency);
+  const savedParts = dualPartsForBase(g.savedBase);
+  const shortfallParts = dualPartsForBase(g.shortfall);
+  const monthlyParts = dualPartsForBase(g.monthlyNeeded);
   return `<div class="card">
     <div class="row">
       <div class="name">${escapeHtml(g.name)}</div>
       <div class="amount small">${g.deadline} 前</div>
     </div>
-    <div class="sub">目标 ${fmt(g.targetAmount)} ${g.currency}${linkedCat?` ・ 关联分类「${escapeHtml(linkedCat.name)}」`:''}</div>
+    <div class="sub">目标 ${targetParts.primary}${targetParts.secondary?` ≈ ${targetParts.secondary}`:''}${linkedCat?` ・ 关联分类「${escapeHtml(linkedCat.name)}」`:''}</div>
     <div class="progress-bar"><div class="${g.shortfall<=0?'':''}" style="width:${g.pct}%"></div></div>
     <div class="row" style="margin-top:8px;">
-      <div class="sub">已存 ≈ ${fmt(g.savedBase)} / ${fmt(g.targetBase)} ${state.baseCurrency}</div>
+      <div class="sub">已存 ≈ ${savedParts.primary}${savedParts.secondary?`（≈${savedParts.secondary}）`:''} / ${fmt(g.targetBase)} ${state.baseCurrency}</div>
+    </div>
+    <div class="row">
       <div class="amount small" style="color:${g.shortfall>0?'#d1453d':'#2f7d6b'}">
-        ${g.shortfall>0 ? '还差 '+fmt(g.shortfall)+' '+state.baseCurrency : '已达成 ✓'}
+        ${g.shortfall>0 ? '还差 '+shortfallParts.primary+(shortfallParts.secondary?'（≈'+shortfallParts.secondary+'）':'') : '已达成 ✓'}
       </div>
     </div>
-    ${g.shortfall>0 ? `<div class="sub">${g.monthsRemaining<=0?'已到期，建议尽快补足':'剩 '+g.monthsRemaining+' 个月，平均每月需存 '+fmt(g.monthlyNeeded)+' '+state.baseCurrency}</div>` : ''}
+    ${g.shortfall>0 ? `<div class="sub">${g.monthsRemaining<=0?'已到期，建议尽快补足':'剩 '+g.monthsRemaining+' 个月，平均每月需存 '+monthlyParts.primary+(monthlyParts.secondary?'（≈'+monthlyParts.secondary+'）':'')}</div>` : ''}
     <div class="modal-actions" style="margin-top:12px;">
       <button class="pill-btn ghost" onclick="openEditGoalModal('${g.id}')">编辑</button>
       <button class="pill-btn danger" onclick="deleteGoal('${g.id}')">删除</button>
@@ -395,6 +439,13 @@ function renderSettings(){
           ${currencies.map(c=>`<option value="${c}" ${c===state.baseCurrency?'selected':''}>${c}</option>`).join('')}
         </select>
       </div>
+      <h3 style="margin-top:14px;">同时显示的次要币种</h3>
+      <div class="field" style="margin-bottom:0;">
+        <select id="secondaryCurrencySelect" onchange="changeSecondaryCurrency(this.value)">
+          ${currencies.map(c=>`<option value="${c}" ${c===state.secondaryCurrency?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="sub" style="margin-top:6px;">所有金额会同时换算显示这个币种，方便你对照看。</div>
     </div>
     <div class="card">
       <h3>汇率设置（1 单位 = 多少本位币）</h3>
@@ -464,6 +515,7 @@ function openAddCategoryModal(){
     </div>
     <div class="field"><label>初始余额</label><input id="f_balance" type="number" step="0.01" value="0"></div>
     <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(state.baseCurrency)}</select></div>
+    <div class="field"><label>每月固定分配金额（用于"本月分配"比例建议，可不填）</label><input id="f_monthlyPlan" type="number" step="0.01" value="0"></div>
     <div class="modal-actions">
       <button class="cancel" onclick="closeModal()">取消</button>
       <button class="submit" onclick="submitAddCategory()">保存</button>
@@ -478,8 +530,9 @@ function submitAddCategory(){
     : selectVal;
   const balance = parseFloat(document.getElementById('f_balance').value) || 0;
   const currency = document.getElementById('f_currency').value;
+  const monthlyPlan = parseFloat(document.getElementById('f_monthlyPlan').value) || 0;
   if(!name) return alert('请输入名称');
-  state.categories.push({id:uid(), name, balance, currency});
+  state.categories.push({id:uid(), name, balance, currency, monthlyPlan, notes:[]});
   save(); closeModal(); render();
 }
 
@@ -491,6 +544,7 @@ function openEditCategoryModal(id){
     <div class="field"><label>名称</label><input id="f_name" value="${escapeHtml(c.name)}"></div>
     <div class="field"><label>余额</label><input id="f_balance" type="number" step="0.01" value="${c.balance}"></div>
     <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(c.currency)}</select></div>
+    <div class="field"><label>每月固定分配金额（用于"本月分配"比例建议，可不填）</label><input id="f_monthlyPlan" type="number" step="0.01" value="${c.monthlyPlan||0}"></div>
     <div class="modal-actions">
       <button class="cancel" onclick="closeModal()">取消</button>
       <button class="submit" onclick="submitEditCategory('${id}')">保存</button>
@@ -502,6 +556,7 @@ function submitEditCategory(id){
   c.name = document.getElementById('f_name').value.trim() || c.name;
   c.balance = parseFloat(document.getElementById('f_balance').value) || 0;
   c.currency = document.getElementById('f_currency').value;
+  c.monthlyPlan = parseFloat(document.getElementById('f_monthlyPlan').value) || 0;
   save(); closeModal(); render();
 }
 function deleteCategory(id){
@@ -601,6 +656,111 @@ function deleteGoal(id){
   save(); render();
 }
 
+/* ---------- 分类明细备忘 ---------- */
+function openCategoryNotesModal(id){
+  renderNotesModal(id);
+}
+function renderNotesModal(id){
+  const c = state.categories.find(x=>x.id===id);
+  if(!c) return;
+  if(!c.notes) c.notes = [];
+  const sum = c.notes.reduce((s,n)=>s+n.amount,0);
+  const itemsHtml = c.notes.map(n=>`
+    <div class="row" style="margin-bottom:8px;">
+      <div class="name" style="font-size:14px;font-weight:500;">${escapeHtml(n.label)}</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="amount small">${fmt(n.amount)} ${c.currency}</div>
+        <button class="icon-btn" onclick="deleteNoteItem('${c.id}','${n.id}')">✕</button>
+      </div>
+    </div>
+  `).join('') || '<div class="sub" style="margin-bottom:8px;">还没有明细项目。</div>';
+  openModal(`
+    <h2>${escapeHtml(c.name)} - 明细备忘</h2>
+    <div style="margin-bottom:8px;">${itemsHtml}</div>
+    <div class="sub" style="margin-bottom:16px;">明细合计 ${fmt(sum)} ${c.currency}（当前分类余额 ${fmt(c.balance)} ${c.currency}）</div>
+    <div class="field"><label>项目名称</label><input id="f_note_label" placeholder="例如：妈妈生活费"></div>
+    <div class="field"><label>金额（${c.currency}）</label><input id="f_note_amount" type="number" step="0.01" placeholder="例如 2000"></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">关闭</button>
+      <button class="submit" onclick="addNoteItem('${c.id}')">添加明细</button>
+    </div>
+  `);
+}
+function addNoteItem(catId){
+  const c = state.categories.find(x=>x.id===catId);
+  const label = document.getElementById('f_note_label').value.trim();
+  const amount = parseFloat(document.getElementById('f_note_amount').value);
+  if(!label) return alert('请输入项目名称');
+  if(isNaN(amount)) return alert('请输入金额');
+  c.notes.push({id:uid(), label, amount});
+  save(); renderNotesModal(catId);
+}
+function deleteNoteItem(catId, noteId){
+  const c = state.categories.find(x=>x.id===catId);
+  c.notes = c.notes.filter(n=>n.id!==noteId);
+  save(); renderNotesModal(catId);
+}
+
+/* ---------- 本月分配 ---------- */
+function openAllocateModal(){
+  openModal(`
+    <h2>本月分配</h2>
+    <div class="sub" style="margin-bottom:12px;">先在「分类」里给需要参与分配的分类填好"每月固定分配金额"，这里输入这个月实际要分配的总金额，会按比例算出建议分配，你可以再手动调整，确认后自动存入各分类。</div>
+    <div class="field"><label>本月总金额</label><input id="alloc_total" type="number" step="0.01" placeholder="例如 25000"></div>
+    <div class="field"><label>金额币种</label><select id="alloc_currency">${currencyOptions(state.baseCurrency)}</select></div>
+    <button class="pill-btn ghost" onclick="generateAllocationSuggestion()">生成建议分配</button>
+    <div id="alloc_rows" style="margin-top:14px;"></div>
+    <div class="sub" id="alloc_summary" style="margin-top:8px;"></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">取消</button>
+      <button class="submit" onclick="confirmAllocation()">确认并存入</button>
+    </div>
+  `);
+}
+function generateAllocationSuggestion(){
+  const totalAmt = parseFloat(document.getElementById('alloc_total').value);
+  const totalCurrency = document.getElementById('alloc_currency').value;
+  if(isNaN(totalAmt) || totalAmt<=0) return alert('请输入本月总金额');
+  const totalBase = toBase(totalAmt, totalCurrency);
+  const planned = state.categories.filter(c=>c.monthlyPlan>0);
+  if(planned.length===0) return alert('请先在「分类」里编辑分类，填好"每月固定分配金额"');
+  const refTotalBase = planned.reduce((s,c)=>s+toBase(c.monthlyPlan,c.currency),0);
+  const rows = planned.map(c=>{
+    const suggestBase = (toBase(c.monthlyPlan,c.currency)/refTotalBase)*totalBase;
+    const suggestOwn = Math.round((suggestBase/(state.rates[c.currency]||1))*100)/100;
+    return {id:c.id, name:c.name, currency:c.currency, amount:suggestOwn};
+  });
+  document.getElementById('alloc_rows').innerHTML = rows.map(r=>`
+    <div class="row" style="margin-bottom:8px;">
+      <div class="name" style="font-size:14px;">${escapeHtml(r.name)}</div>
+      <input data-catid="${r.id}" data-currency="${r.currency}" class="alloc-input"
+        type="number" step="0.01" value="${r.amount}"
+        style="width:120px;text-align:right;padding:6px 8px;border-radius:8px;border:1px solid #e0e2e6;"
+        oninput="updateAllocSummary()">
+    </div>
+  `).join('');
+  updateAllocSummary();
+}
+function updateAllocSummary(){
+  let sumBase = 0;
+  document.querySelectorAll('.alloc-input').forEach(inp=>{
+    sumBase += toBase(parseFloat(inp.value)||0, inp.dataset.currency);
+  });
+  const parts = dualPartsForBase(sumBase);
+  document.getElementById('alloc_summary').textContent =
+    `已分配合计 ≈ ${parts.primary}${parts.secondary?'（≈'+parts.secondary+'）':''}`;
+}
+function confirmAllocation(){
+  const inputs = document.querySelectorAll('.alloc-input');
+  if(inputs.length===0) return alert('请先点「生成建议分配」');
+  inputs.forEach(inp=>{
+    const amt = parseFloat(inp.value)||0;
+    const cat = state.categories.find(c=>c.id===inp.dataset.catid);
+    if(cat) cat.balance += amt;
+  });
+  save(); closeModal(); render();
+}
+
 function openAddCurrencyModal(){
   openModal(`
     <h2>添加币种</h2>
@@ -626,6 +786,11 @@ function updateRate(code, value){
   if(isNaN(rate) || rate<=0) return;
   state.rates[code] = rate;
   save();
+}
+
+function changeSecondaryCurrency(code){
+  state.secondaryCurrency = code;
+  save(); render();
 }
 
 function changeBaseCurrency(newBase){
