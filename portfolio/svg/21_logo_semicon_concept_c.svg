@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
+      <defs><linearGradient id="g_navy" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0c2440" stop-opacity="1"/><stop offset="1" stop-color="#071829" stop-opacity="1"/></linearGradient><linearGradient id="g_accent" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2bd9e8" stop-opacity="1"/><stop offset="1" stop-color="#1f6feb" stop-opacity="1"/></linearGradient><linearGradient id="g_steel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfd7e0" stop-opacity="1"/><stop offset="1" stop-color="#8b99aa" stop-opacity="1"/></linearGradient></defs>
+      <rect width="900" height="900" fill="#f3f5f8"/>
+      <g transform="translate(230.0,170) rotate(0)">
+          <path d="M0,70 V0 H70" stroke="#0c2440" stroke-width="10" fill="none" stroke-linecap="square"/>
+        </g><g transform="translate(670.0,170) rotate(90)">
+          <path d="M0,70 V0 H70" stroke="#0c2440" stroke-width="10" fill="none" stroke-linecap="square"/>
+        </g><g transform="translate(670.0,570) rotate(180)">
+          <path d="M0,70 V0 H70" stroke="#0c2440" stroke-width="10" fill="none" stroke-linecap="square"/>
+        </g><g transform="translate(230.0,570) rotate(270)">
+          <path d="M0,70 V0 H70" stroke="#0c2440" stroke-width="10" fill="none" stroke-linecap="square"/>
+        </g>
+      <line x1="226.0" y1="200.0" x2="210.0" y2="200.0" stroke="#8b99aa" stroke-width="3"/><line x1="226.0" y1="218.0" x2="217.0" y2="218.0" stroke="#8b99aa" stroke-width="3"/><line x1="226.0" y1="236.0" x2="210.0" y2="236.0" stroke="#8b99aa" stroke-width="3"/><line x1="226.0" y1="254.0" x2="217.0" y2="254.0" stroke="#8b99aa" stroke-width="3"/><line x1="226.0" y1="272.0" x2="210.0" y2="272.0" stroke="#8b99aa" stroke-width="3"/><line x1="226.0" y1="290.0" x2="217.0" y2="290.0" stroke="#8b99aa" stroke-width="3"/><line x1="226.0" y1="308.0" x2="210.0" y2="308.0" stroke="#8b99aa" stroke-width="3"/><line x1="226.0" y1="326.0" x2="217.0" y2="326.0" stroke="#8b99aa" stroke-width="3"/><line x1="226.0" y1="344.0" x2="210.0" y2="344.0" stroke="#8b99aa" stroke-width="3"/><line x1="260.0" y1="166" x2="260.0" y2="150" stroke="#8b99aa" stroke-width="3"/><line x1="278.0" y1="166" x2="278.0" y2="157" stroke="#8b99aa" stroke-width="3"/><line x1="296.0" y1="166" x2="296.0" y2="150" stroke="#8b99aa" stroke-width="3"/><line x1="314.0" y1="166" x2="314.0" y2="157" stroke="#8b99aa" stroke-width="3"/><line x1="332.0" y1="166" x2="332.0" y2="150" stroke="#8b99aa" stroke-width="3"/><line x1="350.0" y1="166" x2="350.0" y2="157" stroke="#8b99aa" stroke-width="3"/><line x1="368.0" y1="166" x2="368.0" y2="150" stroke="#8b99aa" stroke-width="3"/><line x1="386.0" y1="166" x2="386.0" y2="157" stroke="#8b99aa" stroke-width="3"/><line x1="404.0" y1="166" x2="404.0" y2="150" stroke="#8b99aa" stroke-width="3"/>
+      
+    <line x1="432.0" y1="110" x2="468.0" y2="110" stroke="#8b99aa" stroke-width="3"/>
+    <line x1="450.0" y1="96" x2="450.0" y2="124" stroke="#8b99aa" stroke-width="3"/>
+    
+      <rect x="320.0" y="450" width="260" height="40" rx="4" fill="url(#g_steel)" stroke="#071829" stroke-width="1.5" opacity="1"/><rect x="350.0" y="404" width="200" height="40" rx="4" fill="url(#g_navy)" stroke="#071829" stroke-width="1.5" opacity="0.95"/><rect x="380.0" y="358" width="140" height="40" rx="4" fill="url(#g_accent)" stroke="#071829" stroke-width="1.5" opacity="0.95"/><rect x="410.0" y="312" width="80" height="40" rx="4" fill="#0c2440" stroke="#071829" stroke-width="1.5" opacity="0.95"/>
+      
+    <text x="450.0" y="730" font-family="Liberation Sans" font-weight="700" font-size="44" letter-spacing="9" fill="#0c2440" text-anchor="middle">ORGANIZATION NAME</text>
+    <line x1="300.0" y1="756" x2="600.0" y2="756" stroke="#8b99aa" stroke-width="1.5"/>
+    <text x="450.0" y="784" font-family="Liberation Sans" font-weight="400" font-size="15" letter-spacing="4" fill="#8b99aa" text-anchor="middle">SEMICONDUCTOR · PANEL · IC DESIGN · R&amp;D</text>
+    
+    </svg>
