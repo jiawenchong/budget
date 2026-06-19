@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
+      <rect width="900" height="900" fill="#ffffff"/>
+      
+    <rect x="317.0" y="247.0" width="266" height="266"
+          rx="10" fill="none" stroke="#000000" stroke-width="3"/>
+    
+      <rect x="345.0" y="275.0" width="34" height="34" rx="3" fill="#000000"/><rect x="389.0" y="275.0" width="34" height="34" rx="3" fill="#000000"/><rect x="433.0" y="275.0" width="34" height="34" rx="3" fill="#000000"/><rect x="477.0" y="275.0" width="34" height="34" rx="3" fill="#000000"/><rect x="521.0" y="275.0" width="34" height="34" rx="3" fill="#000000"/><rect x="345.0" y="319.0" width="34" height="34" rx="3" fill="#000000"/><rect x="389.0" y="319.0" width="34" height="34" rx="3" fill="#000000"/><rect x="433.0" y="319.0" width="34" height="34" rx="3" fill="#000000"/><rect x="477.0" y="319.0" width="34" height="34" rx="3" fill="#000000"/><rect x="521.0" y="319.0" width="34" height="34" rx="3" fill="#000000"/><rect x="345.0" y="363.0" width="34" height="34" rx="3" fill="#000000"/><rect x="389.0" y="363.0" width="34" height="34" rx="3" fill="#000000"/><rect x="433.0" y="363.0" width="34" height="34" rx="3" fill="#fece14"/><rect x="477.0" y="363.0" width="34" height="34" rx="3" fill="#000000"/><rect x="521.0" y="363.0" width="34" height="34" rx="3" fill="#000000"/><rect x="345.0" y="407.0" width="34" height="34" rx="3" fill="#000000"/><rect x="389.0" y="407.0" width="34" height="34" rx="3" fill="#000000"/><rect x="433.0" y="407.0" width="34" height="34" rx="3" fill="#000000"/><rect x="477.0" y="407.0" width="34" height="34" rx="3" fill="#000000"/><rect x="521.0" y="407.0" width="34" height="34" rx="3" fill="#000000"/><rect x="345.0" y="451.0" width="34" height="34" rx="3" fill="#000000"/><rect x="389.0" y="451.0" width="34" height="34" rx="3" fill="#000000"/><rect x="433.0" y="451.0" width="34" height="34" rx="3" fill="#000000"/><rect x="477.0" y="451.0" width="34" height="34" rx="3" fill="#000000"/><rect x="521.0" y="451.0" width="34" height="34" rx="3" fill="#000000"/>
+      <line x1="250.0" y1="559.0" x2="650.0" y2="559.0" stroke="#000000" stroke-width="2"/>
+      
+    <text x="450.0" y="599.0" font-family="Liberation Sans" font-weight="700" font-size="40" letter-spacing="6"
+          fill="#111827" text-anchor="middle">ORGANIZATION NAME</text>
+    <rect x="274.0" y="613.0" width="10" height="10" fill="#fece14"/>
+    <text x="456.0" y="623.0" font-family="Liberation Sans" font-weight="500" font-size="14" letter-spacing="4"
+          fill="#000000" text-anchor="middle">SEMICONDUCTOR &amp; IC DESIGN</text>
+    
+    </svg>
