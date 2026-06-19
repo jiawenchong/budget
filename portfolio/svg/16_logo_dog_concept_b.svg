@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
+      <rect width="900" height="900" fill="#fff6e0"/>
+      
+    <circle cx="450.0" cy="450.0" r="420" fill="#e8632f"/>
+    <circle cx="450.0" cy="450.0" r="404" fill="none" stroke="#fff6e0" stroke-width="4" opacity="0.6"/>
+    
+      
+    <path d="M330.0,290 Q245.0,335 272.0,422 Q298.0,452 335.0,408 Q352.0,348 330.0,290 Z" fill="#9c6a2c"/>
+    <path d="M570.0,290 Q655.0,335 628.0,422 Q602.0,452 565.0,408 Q548.0,348 570.0,290 Z" fill="#9c6a2c"/>
+    
+      <circle cx="450.0" cy="360" r="165" fill="#c9893c"/>
+      <ellipse cx="450.0" cy="415" rx="92" ry="68" fill="#fff6e0"/>
+      
+    <ellipse cx="392.0" cy="340" rx="15" ry="19" fill="#3a2412"/>
+    <ellipse cx="508.0" cy="340" rx="15" ry="19" fill="#3a2412"/>
+    <circle cx="398.0" cy="334" r="5" fill="#fff" opacity="0.85"/>
+    <circle cx="514.0" cy="334" r="5" fill="#fff" opacity="0.85"/>
+    <ellipse cx="360.0" cy="378" rx="20" ry="13" fill="#e87a8a" opacity="0.55"/>
+    <ellipse cx="540.0" cy="378" rx="20" ry="13" fill="#e87a8a" opacity="0.55"/>
+    
+      <ellipse cx="450.0" cy="394" rx="22" ry="16" fill="#3a2412"/><ellipse cx="443.0" cy="388" rx="6" ry="4" fill="#fff" opacity="0.6"/>
+      <path d="M450.0,408 Q450.0,422 430.0,426" stroke="#3a2412" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M446.0,418 Q446.0,452 455.0,458 Q472.0,452 460.0,422 Z" fill="#e87a8a"/>
+      <line x1="453.0" y1="432" x2="453.0" y2="448" stroke="#c85a6e" stroke-width="3" opacity="0.6"/>
+      
+    <rect x="378.0" y="172" width="144" height="40" rx="10" fill="#ffffff"/>
+    <rect x="378.0" y="210" width="144" height="14" fill="#9c6a2c"/>
+    <path d="M380.0,172 Q350.0,100 420.0,130 Q450.0,90 480.0,130 Q550.0,100 520.0,172 Z" fill="#ffffff"/>
+    <circle cx="410.0" cy="135" r="22" fill="#ffffff"/>
+    <circle cx="490.0" cy="135" r="22" fill="#ffffff"/>
+    <circle cx="450.0" cy="120" r="24" fill="#ffffff"/>
+    
+      
+    <ellipse cx="450.0" cy="565" rx="120" ry="26" fill="#5a3a22"/>
+    <path d="M330.0,555 Q450.0,610 570.0,555 L558.0,565 Q450.0,600 342.0,565 Z" fill="#e8632f"/>
+    <ellipse cx="450.0" cy="555" rx="108" ry="20" fill="#f3d98a"/>
+    <path d="M434.0,538 C444.0,518.0 424.0,503.0 434.0,488" stroke="#fff6e0" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.5"/><path d="M450.0,538 C442.0,518.0 458.0,503.0 450.0,488" stroke="#fff6e0" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.5"/><path d="M466.0,538 C476.0,518.0 456.0,503.0 466.0,488" stroke="#fff6e0" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.5"/>
+    
+      
+    <path d="M170.0,700 L730.0,700 L708.0,830 L480.0,812 L420.0,812 L192.0,830 Z" fill="#e8632f"/>
+    <path d="M170.0,700 L144.0,722 L180.0,740 Z" fill="#b8431a"/>
+    <path d="M730.0,700 L756.0,722 L720.0,740 Z" fill="#b8431a"/>
+    <text x="450.0" y="752" font-family="Noto Sans CJK TC Black" font-weight="900" font-size="40" fill="#fff6e0" text-anchor="middle">旺福食堂</text>
+    <text x="450.0" y="788" font-family="Liberation Sans" font-weight="700" font-size="20" letter-spacing="3" fill="#f3d98a" text-anchor="middle">WAG &amp; DINE</text>
+    
+    </svg>

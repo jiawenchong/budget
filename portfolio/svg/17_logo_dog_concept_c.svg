@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
+      <rect width="900" height="900" fill="#fff6e0"/>
+      
+    <circle cx="450.0" cy="450.0" r="420" fill="#c9893c"/>
+    <circle cx="450.0" cy="450.0" r="404" fill="none" stroke="#fff6e0" stroke-width="4" opacity="0.6"/>
+    
+      
+    <path d="M300.0,160 L390.0,160 L320.0,290 Z" fill="#e8632f"/>
+    <path d="M600.0,160 L510.0,160 L580.0,290 Z" fill="#e8632f"/>
+    
+      <path d="M355.0,420 Q450.0,340 545.0,420 Q520.0,530 450.0,530 Q380.0,530 355.0,420 Z" fill="#9c6a2c"/>
+      <ellipse cx="340.0" cy="290" rx="34" ry="44" fill="#9c6a2c" transform="rotate(-18 340.0 290)"/><ellipse cx="410.0" cy="250" rx="34" ry="46" fill="#9c6a2c" transform="rotate(-4 410.0 250)"/><ellipse cx="490.0" cy="250" rx="34" ry="46" fill="#9c6a2c" transform="rotate(4 490.0 250)"/><ellipse cx="560.0" cy="290" rx="34" ry="44" fill="#9c6a2c" transform="rotate(18 560.0 290)"/>
+      <g transform="translate(410.0,390) rotate(-8)">
+      <ellipse cx="0" cy="-92" rx="26" ry="36" fill="#fff6e0"/>
+      <rect x="-7" y="-60" width="14" height="170" rx="7" fill="#fff6e0"/>
+    </g><g transform="translate(490.0,390) rotate(8)">
+      <path d="M-20,-130 L-20,-78 M-7,-132 L-7,-78 M7,-132 L7,-78 M20,-130 L20,-78" stroke="#fff6e0" stroke-width="11" stroke-linecap="round"/>
+      <path d="M-24,-78 Q0,-58 24,-78 L22,-62 Q0,-46 -22,-62 Z" fill="#fff6e0"/>
+      <rect x="-7" y="-66" width="14" height="156" rx="7" fill="#fff6e0"/>
+    </g>
+      
+    <path d="M170.0,700 L730.0,700 L708.0,830 L480.0,812 L420.0,812 L192.0,830 Z" fill="#e8632f"/>
+    <path d="M170.0,700 L144.0,722 L180.0,740 Z" fill="#b8431a"/>
+    <path d="M730.0,700 L756.0,722 L720.0,740 Z" fill="#b8431a"/>
+    <text x="450.0" y="752" font-family="Noto Sans CJK TC Black" font-weight="900" font-size="40" fill="#fff6e0" text-anchor="middle">旺福食堂</text>
+    <text x="450.0" y="788" font-family="Liberation Sans" font-weight="700" font-size="20" letter-spacing="3" fill="#f3d98a" text-anchor="middle">WAG &amp; DINE</text>
+    
+    </svg>
