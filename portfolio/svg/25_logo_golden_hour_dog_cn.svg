@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
+      <rect width="900" height="900" fill="#FBF3E6"/>
+      <polygon points="290.6,307.1 309.0,277.6 256.0,265.0" fill="#8C5212"/><circle cx="256.0" cy="265.0" r="7.0" fill="#8C5212"/><polygon points="344.6,243.8 375.0,227.0 334.8,190.2" fill="#8C5212"/><circle cx="334.8" cy="190.2" r="7.0" fill="#8C5212"/><polygon points="422.6,214.7 457.4,214.7 440.0,163.0" fill="#8C5212"/><circle cx="440.0" cy="163.0" r="7.0" fill="#8C5212"/><polygon points="505.0,227.0 535.4,243.8 545.2,190.2" fill="#8C5212"/><circle cx="545.2" cy="190.2" r="7.0" fill="#8C5212"/><polygon points="571.0,277.6 589.4,307.1 624.0,265.0" fill="#8C5212"/><circle cx="624.0" cy="265.0" r="7.0" fill="#8C5212"/>
+      <ellipse cx="300.0" cy="440.0" rx="50.0" ry="150.0" fill="#8C5212" transform="rotate(-8 300 440)"/>
+      <g transform="translate(660,545) rotate(32)">
+      <rect x="-115.0" y="-28.0" width="230.0" height="56.0" fill="#8C5212"/>
+      <circle cx="-115.0" cy="-28.0" r="34.7" fill="#8C5212"/>
+      <circle cx="-115.0" cy="28.0" r="34.7" fill="#8C5212"/>
+      <circle cx="115.0" cy="-28.0" r="34.7" fill="#8C5212"/>
+      <circle cx="115.0" cy="28.0" r="34.7" fill="#8C5212"/>
+    </g>
+      <circle cx="440.0" cy="380.0" r="175.0" fill="#8C5212"/>
+      <rect x="560.0" y="305.0" width="195.0" height="135.0" fill="#8C5212"/>
+      <rect x="520.0" y="430.0" width="150.0" height="95.0" fill="#8C5212"/>
+      <circle cx="752.0" cy="372.0" r="42.0" fill="#8C5212"/>
+      <polygon points="478.0,330.0 500.0,352.0 478.0,374.0 456.0,352.0" fill="#FBF3E6"/>
+      
+    <text x="450.0" y="800" font-family="Noto Sans CJK TC" font-weight="900" font-size="58" letter-spacing="14"
+          fill="#8C5212" text-anchor="middle">黄金时刻</text>
+    <line x1="290.0" y1="826" x2="610.0" y2="826" stroke="#8C5212" stroke-width="2"/>
+    <text x="450.0" y="852" font-family="Liberation Sans" font-weight="400" font-size="15" letter-spacing="5"
+          fill="#8C5212" text-anchor="middle">GOLDEN HOUR &#183; DOG BISTRO</text>
+    
+    </svg>
