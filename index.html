@@ -394,15 +394,31 @@ function renderCategories(){
   `;}).join('');
 }
 
+// 同一分类被多个目标关联时，按到期日由近到远依次分配该分类余额，避免同一笔钱被重复计入多个目标
+function goalSavedBase(g){
+  if(!g.linkedCategoryId){
+    return toBase(g.manualSaved||0, g.currency);
+  }
+  const cat = state.categories.find(c=>c.id===g.linkedCategoryId);
+  if(!cat) return 0;
+  const siblings = state.goals
+    .filter(x=>x.linkedCategoryId===g.linkedCategoryId)
+    .slice()
+    .sort((a,b)=>a.deadline.localeCompare(b.deadline));
+  let available = toBase(cat.balance, cat.currency);
+  let result = 0;
+  for(const sib of siblings){
+    const target = toBase(sib.targetAmount, sib.currency);
+    const allocated = Math.min(available, target);
+    available -= allocated;
+    if(sib.id===g.id){ result = allocated; break; }
+  }
+  return result;
+}
+
 function computeGoal(g){
   const targetBase = toBase(g.targetAmount, g.currency);
-  let savedBase;
-  if(g.linkedCategoryId){
-    const cat = state.categories.find(c=>c.id===g.linkedCategoryId);
-    savedBase = cat ? toBase(cat.balance, cat.currency) : 0;
-  }else{
-    savedBase = toBase(g.manualSaved||0, g.currency);
-  }
+  const savedBase = goalSavedBase(g);
   const shortfall = targetBase - savedBase;
   const now = new Date();
   const [dy, dm] = g.deadline.split('-').map(Number);
@@ -417,6 +433,7 @@ function computeGoal(g){
 function goalCardHtml(gRaw){
   const g = computeGoal(gRaw);
   const linkedCat = g.linkedCategoryId ? state.categories.find(c=>c.id===g.linkedCategoryId) : null;
+  const sharedCount = g.linkedCategoryId ? state.goals.filter(x=>x.linkedCategoryId===g.linkedCategoryId).length : 1;
   const targetParts = dualPartsForCurrency(g.targetAmount, g.currency);
   const savedParts = dualPartsForBase(g.savedBase);
   const shortfallParts = dualPartsForBase(g.shortfall);
@@ -428,6 +445,7 @@ function goalCardHtml(gRaw){
       <div class="amount small">${g.deadline} 前</div>
     </div>
     <div class="sub">目标 ${targetParts.primary}${targetParts.secondary?` ≈ ${targetParts.secondary}`:''}${linkedCat?` ・ 关联分类「${escapeHtml(linkedCat.name)}」`:''}</div>
+    ${sharedCount>1 ? `<div class="sub">该分类由 ${sharedCount} 个目标共用余额，按到期日由近到远依次分配</div>` : ''}
     <div class="progress-bar"><div class="${g.shortfall<=0?'':''}" style="width:${g.pct}%"></div></div>
     <div class="row" style="margin-top:8px;">
       <div class="sub">已存 ≈ ${savedParts.primary}${savedParts.secondary?`（≈${savedParts.secondary}）`:''} / ${fmt(g.targetBase)} ${state.baseCurrency}</div>
