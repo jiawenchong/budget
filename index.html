@@ -193,6 +193,7 @@
     <div class="total-label">资产总览(折算为 <span id="baseCurrencyLabel">-</span>)</div>
     <div class="total-value" id="totalValue">0</div>
     <div class="total-sub" id="totalSecondary"></div>
+    <div class="total-sub" id="poolLine"></div>
     <div class="total-sub" id="goalAlert"></div>
   </header>
   <main id="view"></main>
@@ -227,6 +228,7 @@ function defaultState(){
     baseCurrency: 'NTD',
     secondaryCurrency: 'MYR',
     rates: { NTD: 1, MYR: 8 }, // 1 单位该币种 = rates[code] 个 base currency
+    unallocated: 0, // 未分配资金池，按本位币计
     categories: [],
     goals: [],
     history: []
@@ -242,6 +244,7 @@ function load(){
     if(!data.rates[data.baseCurrency]) data.rates[data.baseCurrency] = 1;
     if(!data.secondaryCurrency) data.secondaryCurrency = data.rates.MYR ? 'MYR' : data.baseCurrency;
     if(!data.history) data.history = [];
+    if(typeof data.unallocated !== 'number' || isNaN(data.unallocated)) data.unallocated = 0;
     data.categories.forEach(c=>{
       if(c.monthlyPlan===undefined) c.monthlyPlan = 0;
       if(!c.notes) c.notes = [];
@@ -317,10 +320,15 @@ function dualHtml(parts, cssClass){
 /* ---------- 渲染 ---------- */
 function render(){
   document.getElementById('baseCurrencyLabel').textContent = state.baseCurrency;
-  const total = state.categories.reduce((sum,c)=> sum + toBase(c.balance, c.currency), 0);
+  const catTotal = state.categories.reduce((sum,c)=> sum + toBase(c.balance, c.currency), 0);
+  const pool = state.unallocated || 0;
+  const total = catTotal + pool;
   const totalParts = dualPartsForBase(total);
   document.getElementById('totalValue').textContent = totalParts.primary;
   document.getElementById('totalSecondary').textContent = totalParts.secondary ? `≈ ${totalParts.secondary}` : '';
+  const poolParts = dualPartsForBase(pool);
+  document.getElementById('poolLine').textContent =
+    `未分配(可自由支配) ${poolParts.primary}${poolParts.secondary?' ≈ '+poolParts.secondary:''} ・ 已分配 ${fmt(catTotal)} ${state.baseCurrency}`;
 
   // 目标提醒：找最近 1 个未达成目标
   const upcoming = state.goals
@@ -347,9 +355,22 @@ function render(){
 }
 
 function renderOverview(){
-  let html = `<button class="pill-btn" style="width:100%;margin-bottom:14px;" onclick="openAllocateModal()">本月分配</button>`;
+  let html = `<div class="modal-actions" style="margin-top:0;margin-bottom:14px;">
+    <button class="pill-btn" onclick="openIncomeModal()">入账</button>
+    <button class="pill-btn ghost" onclick="openSpendModal()">记支出</button>
+    <button class="pill-btn ghost" onclick="openAllocateModal()">本月分配</button>
+  </div>`;
+  html += `<div class="section-title">未分配资金池</div><div class="card">
+    <div class="row">
+      <div>
+        <div class="name">未分配</div>
+        <div class="sub">薪水等收入先「入账」到这里，再用「本月分配」划到各分类</div>
+      </div>
+      <div style="flex-shrink:0;margin-left:10px;">${dualHtml(dualPartsForBase(state.unallocated||0), 'amount')}</div>
+    </div>
+  </div>`;
   if(state.categories.length===0 && state.goals.length===0){
-    return html + `<div class="empty">还没有数据。<br>点右下角 “+” 添加第一个分类吧。</div>`;
+    return html + `<div class="empty">还没有分类。<br>点右下角 “+” 添加第一个分类吧。</div>`;
   }
   if(state.categories.length){
     html += `<div class="section-title">分类余额</div><div class="card">`;
@@ -472,13 +493,32 @@ function renderGoals(){
   return state.goals.map(g=>goalCardHtml(g)).join('');
 }
 
-const HISTORY_TYPE_LABEL = {deposit:'存入', expense:'支出', allocation:'本月分配', create:'新建分类'};
+const HISTORY_TYPE_LABEL = {deposit:'存入', expense:'支出', allocation:'本月分配', create:'新建分类', income:'入账', transfer:'从未分配池划入'};
 
 function renderHistory(){
   if(state.history.length===0){
-    return `<div class="empty">还没有历史记录。<br>存入/支出或本月分配后会自动记录在这里。</div>`;
+    return `<div class="empty">还没有历史记录。<br>入账、支出或本月分配后会自动记录在这里。</div>`;
   }
-  let html = '';
+  // 本月收支小结：只统计真实进出（入账/存入/新建分类 vs 支出），内部划转不算
+  const ym = new Date().toISOString().slice(0,7);
+  let inBase = 0, outBase = 0;
+  state.history.forEach(h=>{
+    if(!h.date || !h.date.startsWith(ym)) return;
+    const b = toBase(h.amount, h.currency);
+    if(h.type==='income' || h.type==='deposit' || h.type==='create'){ if(b>0) inBase += b; }
+    else if(h.type==='expense'){ outBase += Math.abs(b); }
+  });
+  const netBase = inBase - outBase;
+  const inParts = dualPartsForBase(inBase);
+  const outParts = dualPartsForBase(outBase);
+  const netParts = dualPartsForBase(Math.abs(netBase));
+  let html = `<div class="card">
+    <h3>本月收支（${ym}）</h3>
+    <div class="row"><div class="sub">入账</div><div class="amount small" style="color:var(--accent);">+${inParts.primary}${inParts.secondary?'（≈'+inParts.secondary+'）':''}</div></div>
+    <div class="row"><div class="sub">支出</div><div class="amount small" style="color:var(--danger);">-${outParts.primary}${outParts.secondary?'（≈'+outParts.secondary+'）':''}</div></div>
+    <div class="row"><div class="sub">净变化</div><div class="amount small" style="color:${netBase>=0?'var(--accent)':'var(--danger)'};">${netBase>=0?'+':'-'}${netParts.primary}${netParts.secondary?'（≈'+netParts.secondary+'）':''}</div></div>
+    <div class="sub" style="margin-top:6px;">分配/划转属于内部转移，不计入收支。</div>
+  </div>`;
   let lastDate = null;
   state.history.forEach(h=>{
     if(h.date!==lastDate){
@@ -656,9 +696,16 @@ function deleteCategory(id){
 
 function openAddMoneyModal(id){
   const c = state.categories.find(x=>x.id===id);
+  const poolParts = dualPartsForBase(state.unallocated||0);
   openModal(`
     <h2>${escapeHtml(c.name)} - 存入/支出</h2>
     <div class="field"><label>金额（支出请填负数）</label><input id="f_amount" type="number" step="0.01" placeholder="例如 500 或 -200"></div>
+    <div class="field"><label>存入时的资金来源（支出时不适用）</label>
+      <select id="f_source">
+        <option value="pool">从未分配池划入（当前 ${poolParts.primary}）</option>
+        <option value="external">外部收入，直接存入</option>
+      </select>
+    </div>
     <div class="modal-actions">
       <button class="cancel" onclick="closeModal()">取消</button>
       <button class="submit" onclick="submitAddMoney('${id}')">确定</button>
@@ -669,8 +716,78 @@ function submitAddMoney(id){
   const c = state.categories.find(x=>x.id===id);
   const amt = parseFloat(document.getElementById('f_amount').value);
   if(isNaN(amt)) return alert('请输入金额');
+  if(amt>0 && document.getElementById('f_source').value==='pool'){
+    const amtBase = toBase(amt, c.currency);
+    if(amtBase > (state.unallocated||0) && !confirm('未分配池余额不足，划入后未分配会变成负数，仍要继续吗？')) return;
+    state.unallocated = (state.unallocated||0) - amtBase;
+    addHistoryEntry({type:'transfer', categoryId:c.id, categoryName:c.name, amount:amt, currency:c.currency});
+  }else{
+    addHistoryEntry({type: amt>=0?'deposit':'expense', categoryId:c.id, categoryName:c.name, amount:amt, currency:c.currency});
+  }
   c.balance += amt;
-  addHistoryEntry({type: amt>=0?'deposit':'expense', categoryId:c.id, categoryName:c.name, amount:amt, currency:c.currency});
+  save(); closeModal(); render();
+}
+
+/* ---------- 入账 / 记支出（未分配资金池） ---------- */
+function openIncomeModal(){
+  openModal(`
+    <h2>入账（进入未分配池）</h2>
+    <div class="sub" style="margin-bottom:12px;">薪水等任何收入先记在这里，之后再用「本月分配」或分类的「存入」划到各分类。</div>
+    <div class="field"><label>金额</label><input id="f_amount" type="number" step="0.01" placeholder="例如 25000"></div>
+    <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(state.baseCurrency)}</select></div>
+    <div class="field"><label>备注（可不填）</label><input id="f_label" placeholder="例如：7月薪水"></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">取消</button>
+      <button class="submit" onclick="submitIncome()">确定</button>
+    </div>
+  `);
+}
+function submitIncome(){
+  const amt = parseFloat(document.getElementById('f_amount').value);
+  const currency = document.getElementById('f_currency').value;
+  const label = document.getElementById('f_label').value.trim();
+  if(isNaN(amt) || amt<=0) return alert('请输入大于 0 的金额');
+  state.unallocated = (state.unallocated||0) + toBase(amt, currency);
+  addHistoryEntry({type:'income', categoryId:null, categoryName: label || '未分配池', amount:amt, currency});
+  save(); closeModal(); render();
+}
+
+function openSpendModal(){
+  const poolParts = dualPartsForBase(state.unallocated||0);
+  openModal(`
+    <h2>记支出</h2>
+    <div class="field"><label>金额</label><input id="f_amount" type="number" step="0.01" placeholder="例如 800"></div>
+    <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(state.baseCurrency)}</select></div>
+    <div class="field"><label>从哪里扣</label>
+      <select id="f_source">
+        <option value="">未分配池（当前 ${poolParts.primary}）</option>
+        ${state.categories.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>备注（可不填）</label><input id="f_label" placeholder="例如：网购 / 吃饭"></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">取消</button>
+      <button class="submit" onclick="submitSpend()">确定</button>
+    </div>
+  `);
+}
+function submitSpend(){
+  const amt = parseFloat(document.getElementById('f_amount').value);
+  const currency = document.getElementById('f_currency').value;
+  const sourceId = document.getElementById('f_source').value;
+  const label = document.getElementById('f_label').value.trim();
+  if(isNaN(amt) || amt<=0) return alert('请输入大于 0 的金额');
+  const amtBase = toBase(amt, currency);
+  if(sourceId){
+    const c = state.categories.find(x=>x.id===sourceId);
+    if(!c) return;
+    c.balance -= fromBase(amtBase, c.currency);
+    addHistoryEntry({type:'expense', categoryId:c.id, categoryName: label ? `${c.name}・${label}` : c.name, amount:-amt, currency});
+  }else{
+    if(amtBase > (state.unallocated||0) && !confirm('未分配池余额不足，扣除后会变成负数，仍要继续吗？')) return;
+    state.unallocated = (state.unallocated||0) - amtBase;
+    addHistoryEntry({type:'expense', categoryId:null, categoryName: label || '未分配池', amount:-amt, currency});
+  }
   save(); closeModal(); render();
 }
 
@@ -837,10 +954,14 @@ function deleteGoalNoteItem(goalId, noteId){
 
 /* ---------- 本月分配 ---------- */
 function openAllocateModal(){
+  const pool = state.unallocated || 0;
+  const poolParts = dualPartsForBase(pool);
+  const prefill = pool > 0 ? Math.round(pool*100)/100 : '';
   openModal(`
     <h2>本月分配</h2>
-    <div class="sub" style="margin-bottom:12px;">先在「分类」里给需要参与分配的分类填好"每月固定分配金额"，这里输入这个月实际要分配的总金额，会按比例算出建议分配，你可以再手动调整，确认后自动存入各分类。</div>
-    <div class="field"><label>本月总金额</label><input id="alloc_total" type="number" step="0.01" placeholder="例如 25000"></div>
+    <div class="sub" style="margin-bottom:12px;">先在「分类」里给需要参与分配的分类填好"每月固定分配金额"，这里输入这个月实际要分配的总金额，会按比例算出建议分配，你可以再手动调整，确认后从未分配池划入各分类。</div>
+    <div class="sub" style="margin-bottom:12px;">未分配池当前 ${poolParts.primary}${poolParts.secondary?' ≈ '+poolParts.secondary:''}</div>
+    <div class="field"><label>本月总金额（已预填未分配池全部，可修改）</label><input id="alloc_total" type="number" step="0.01" value="${prefill}" placeholder="例如 25000"></div>
     <div class="field"><label>金额币种</label><select id="alloc_currency">${currencyOptions(state.baseCurrency)}</select></div>
     <button class="pill-btn ghost" onclick="generateAllocationSuggestion()">生成建议分配</button>
     <div id="alloc_rows" style="margin-top:14px;"></div>
@@ -887,6 +1008,9 @@ function updateAllocSummary(){
 function confirmAllocation(){
   const inputs = document.querySelectorAll('.alloc-input');
   if(inputs.length===0) return alert('请先点「生成建议分配」');
+  let sumBase = 0;
+  inputs.forEach(inp=>{ sumBase += toBase(parseFloat(inp.value)||0, inp.dataset.currency); });
+  if(sumBase > (state.unallocated||0) && !confirm('分配总额超过未分配池余额，确认后未分配会变成负数，仍要继续吗？')) return;
   inputs.forEach(inp=>{
     const amt = parseFloat(inp.value)||0;
     const cat = state.categories.find(c=>c.id===inp.dataset.catid);
@@ -895,6 +1019,7 @@ function confirmAllocation(){
       addHistoryEntry({type:'allocation', categoryId:cat.id, categoryName:cat.name, amount:amt, currency:cat.currency});
     }
   });
+  state.unallocated = (state.unallocated||0) - sumBase;
   save(); closeModal(); render();
 }
 
@@ -937,6 +1062,7 @@ function changeBaseCurrency(newBase){
     state.rates[code] = state.rates[code] / pivot;
   });
   state.rates[newBase] = 1;
+  state.unallocated = (state.unallocated||0) / pivot; // 未分配池按本位币计，需一并折算
   state.baseCurrency = newBase;
   save(); render();
 }
@@ -959,6 +1085,10 @@ document.getElementById('importFile').addEventListener('change', (e)=>{
     try{
       const data = JSON.parse(reader.result);
       if(!data.categories || !data.goals || !data.rates) throw new Error('格式不对');
+      if(!data.history) data.history = [];
+      if(typeof data.unallocated !== 'number' || isNaN(data.unallocated)) data.unallocated = 0;
+      data.categories.forEach(c=>{ if(c.monthlyPlan===undefined) c.monthlyPlan=0; if(!c.notes) c.notes=[]; });
+      data.goals.forEach(g=>{ if(!g.notes) g.notes=[]; });
       state = data;
       save(); render();
       alert('导入成功');
