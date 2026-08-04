@@ -3,8 +3,8 @@
   <name>Cloudflare Tunnel</name>
   <description>Notebook 固定公網網址</description>
 
-  <executable>C:\path\to\cloudflared.exe</executable>
-  <arguments>tunnel --config C:\Users\你的帳號\.cloudflared\config.yml run</arguments>
+  <executable>D:\Web Service\NoteBook\CloudFlaredSvc.exe</executable>
+  <arguments>tunnel --config D:\Web Service\NoteBook\cmd.exe\.cloudflared\config.yml run</arguments>
 
   <startmode>Automatic</startmode>
   <delayedAutoStart>true</delayedAutoStart>
@@ -17,6 +17,6 @@
   <log mode="roll-by-size">
     <sizeThreshold>10240</sizeThreshold>
     <keepFiles>5</keepFiles>
-    <logpath>C:\path\to\cloudflared-logs</logpath>
+    <logpath>D:\Web Service\NoteBook\CloudFlared-logs</logpath>
   </log>
 </service>
