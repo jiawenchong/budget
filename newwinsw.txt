@@ -1,7 +1,7 @@
 <service>
-  <id>NewApp</id>
-  <name>New App Service</name>
-  <description>我的 Flask 應用服務</description>
+  <id>NotebookApp</id>
+  <name>Notebook App</name>
+  <description>Flask 筆記本</description>
 
   <executable>%BASE%\venv\Scripts\waitress-serve.exe</executable>
   <arguments>--listen=127.0.0.1:8000 --threads=4 app:app</arguments>
