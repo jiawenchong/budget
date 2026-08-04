@@ -1,0 +1,22 @@
+<service>
+  <id>CloudflaredTunnel</id>
+  <name>Cloudflare Tunnel</name>
+  <description>將 Notebook 暴露到公網</description>
+
+  <executable>C:\path\to\cloudflared.exe</executable>
+  <arguments>tunnel --url http://127.0.0.1:8000 --no-autoupdate</arguments>
+
+  <startmode>Automatic</startmode>
+  <delayedAutoStart>true</delayedAutoStart>
+
+  <onfailure action="restart" delay="10 sec" />
+  <onfailure action="restart" delay="30 sec" />
+  <onfailure action="restart" delay="60 sec" />
+  <resetfailure>1 hour</resetfailure>
+
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>5</keepFiles>
+    <logpath>C:\path\to\logs</logpath>
+  </log>
+</service>
