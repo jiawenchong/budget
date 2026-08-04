@@ -1,0 +1,26 @@
+<service>
+  <id>NewApp</id>
+  <name>New App Service</name>
+  <description>我的 Flask 應用服務</description>
+
+  <executable>%BASE%\venv\Scripts\waitress-serve.exe</executable>
+  <arguments>--listen=*:8010 app:app</arguments>
+  <workingdirectory>%BASE%</workingdirectory>
+
+  <startmode>Automatic</startmode>
+  <delayedAutoStart>true</delayedAutoStart>
+
+  <onfailure action="restart" delay="10 sec" />
+  <onfailure action="restart" delay="30 sec" />
+  <onfailure action="restart" delay="60 sec" />
+  <resetfailure>1 hour</resetfailure>
+
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>5</keepFiles>
+    <logpath>%BASE%\logs</logpath>
+  </log>
+
+  <env name="PYTHONUNBUFFERED" value="1" />
+  <env name="PYTHONIOENCODING" value="utf-8" />
+</service>
