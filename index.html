@@ -216,6 +216,7 @@
 <script>
 /* ---------- 数据层 ---------- */
 const STORAGE_KEY = 'budgetAppData_v1';
+const APP_VERSION = '2026.10.13';
 
 const PRESET_CATEGORIES = [
   'Savings', 'Flight ticket', 'Parents', 'Commonwealth',
@@ -639,6 +640,7 @@ function renderSettings(){
     <div class="card">
       <button class="pill-btn danger" style="width:100%;" onclick="clearAllData()">清空所有数据</button>
     </div>
+    <div class="sub" style="text-align:center;margin-top:4px;">版本 ${APP_VERSION}</div>
   `;
 }
 
@@ -1262,8 +1264,18 @@ document.getElementById('fabBtn').addEventListener('click', ()=>{
 render();
 
 if('serviceWorker' in navigator){
+  // 新版 SW 接管时自动刷新一次，载入最新页面（首次安装不刷新）
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    if(!hadController || reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
   window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.register('sw.js', {updateViaCache:'none'})
+      .then(reg=>reg.update())
+      .catch(()=>{});
   });
 }
 </script>
