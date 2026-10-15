@@ -216,7 +216,7 @@
 <script>
 /* ---------- 数据层 ---------- */
 const STORAGE_KEY = 'budgetAppData_v1';
-const APP_VERSION = '2026.10.15-3';
+const APP_VERSION = '2026.10.15-4';
 
 const PRESET_CATEGORIES = [
   'Savings', 'Flight ticket', 'Parents', 'Commonwealth',
@@ -245,8 +245,27 @@ function defaultState(){
     unallocated: 0, // 未分配资金池，按本位币计
     categories: [],
     goals: [],
-    history: []
+    history: [],
+    lastBackupAt: null // 上次导出备份的时间（ISO 字符串）
   };
+}
+
+// 备份提醒：超过 7 天没导出就提醒（Safari 连续 7 天没打开网站可能会清掉网站数据）
+const BACKUP_REMIND_DAYS = 7;
+function daysSinceBackup(){
+  if(!state.lastBackupAt) return null;
+  const t = new Date(state.lastBackupAt).getTime();
+  if(isNaN(t)) return null;
+  return Math.max(0, Math.floor((Date.now() - t) / 86400000));
+}
+function hasAnyData(){
+  return state.categories.length>0 || state.history.length>0 || state.goals.length>0 || Math.abs(state.unallocated||0)>=0.01;
+}
+function backupStatusText(){
+  const d = daysSinceBackup();
+  if(d===null) return '还没备份过';
+  const when = localDateStr(new Date(state.lastBackupAt));
+  return d===0 ? `上次备份：今天（${when}）` : `上次备份：${when}（${d} 天前）`;
 }
 
 // 旧版目标只能关联一个分类（linkedCategoryId），统一转成可多选的 linkedCategoryIds
@@ -429,8 +448,21 @@ function render(){
   document.getElementById('fabBtn').style.display = (activeTab==='settings' || activeTab==='history') ? 'none' : 'flex';
 }
 
+function backupReminderHtml(){
+  if(!hasAnyData()) return '';
+  const d = daysSinceBackup();
+  if(d!==null && d < BACKUP_REMIND_DAYS) return '';
+  const title = d===null ? '还没备份过数据' : `已经 ${d} 天没备份了`;
+  return `<div class="card" style="border:1px solid var(--warn);background:#fff8ec;">
+    <div class="name" style="color:var(--warn);">⚠️ ${title}</div>
+    <div class="sub" style="margin-bottom:10px;">数据只存在这台手机的浏览器里。Safari 连续 7 天没打开这个网站时，可能会清掉网站数据，建议现在导出一份备份。</div>
+    <button class="pill-btn" style="width:100%;background:var(--warn);" onclick="exportData()">立即导出备份</button>
+  </div>`;
+}
+
 function renderOverview(){
-  let html = `<div class="modal-actions" style="margin-top:0;margin-bottom:14px;">
+  let html = backupReminderHtml();
+  html += `<div class="modal-actions" style="margin-top:0;margin-bottom:14px;">
     <button class="pill-btn" onclick="openIncomeModal()">入账</button>
     <button class="pill-btn ghost" onclick="openSpendModal()">记支出</button>
     <button class="pill-btn ghost" onclick="openAllocateModal()">本月分配</button>
@@ -789,7 +821,8 @@ function renderSettings(){
         <button class="pill-btn ghost" onclick="exportData()">导出备份</button>
         <button class="pill-btn ghost" onclick="document.getElementById('importFile').click()">导入备份</button>
       </div>
-      <div class="sub" style="margin-top:8px;">数据只保存在本机浏览器中，清除浏览器数据会丢失，建议偶尔导出备份。</div>
+      <div class="sub" style="margin-top:8px;color:${(daysSinceBackup()===null || daysSinceBackup()>=BACKUP_REMIND_DAYS) && hasAnyData() ? 'var(--warn)' : 'var(--muted)'};">${backupStatusText()}</div>
+      <div class="sub" style="margin-top:4px;">数据只保存在本机浏览器中，清除浏览器数据会丢失。超过 ${BACKUP_REMIND_DAYS} 天没备份时，总览页会提醒你。</div>
     </div>
     <div class="card">
       <button class="pill-btn danger" style="width:100%;" onclick="clearAllData()">清空所有数据</button>
@@ -1569,13 +1602,18 @@ function changeBaseCurrency(newBase){
 
 /* ---------- 备份 ---------- */
 function exportData(){
-  const blob = new Blob([JSON.stringify({...state, exportedAt: new Date().toISOString()}, null, 2)], {type:'application/json'});
+  const now = new Date().toISOString();
+  state.lastBackupAt = now;
+  save();
+  const blob = new Blob([JSON.stringify({...state, exportedAt: now}, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = `budget-backup-${localDateStr()}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // iOS Safari 立刻释放链接可能导致下载失败，稍后再释放
+  setTimeout(()=>URL.revokeObjectURL(url), 30000);
+  render();
 }
 document.getElementById('importFile').addEventListener('change', (e)=>{
   const file = e.target.files[0];
@@ -1594,6 +1632,7 @@ document.getElementById('importFile').addEventListener('change', (e)=>{
     const msg = `这个备份里有：\n${when}分类 ${data.categories.length} 个、目标 ${data.goals.length} 个、历史记录 ${data.history.length} 笔\n总资产 ${fmt(fileTotal)} ${data.baseCurrency}\n\n导入会【完全覆盖】手机上现在的数据（分类 ${state.categories.length} 个、历史 ${state.history.length} 笔）。确定要导入吗？`;
     if(!confirm(msg)) return;
     try{ localStorage.setItem(STORAGE_KEY + '_before_import', JSON.stringify(state)); }catch(_){}
+    if(data.exportedAt) data.lastBackupAt = data.exportedAt; // 导入的文件本身就是那一天的备份
     delete data.exportedAt;
     state = data;
     save(); render();
