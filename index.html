@@ -216,7 +216,7 @@
 <script>
 /* ---------- 数据层 ---------- */
 const STORAGE_KEY = 'budgetAppData_v1';
-const APP_VERSION = '2026.10.15-2';
+const APP_VERSION = '2026.10.15-3';
 
 const PRESET_CATEGORIES = [
   'Savings', 'Flight ticket', 'Parents', 'Commonwealth',
@@ -258,24 +258,35 @@ function migrateGoal(g){
   delete g.linkedCategoryId;
 }
 
+// 读取本机数据与导入备份共用：补齐旧版缺少的字段、修正异常值。格式不对时抛出错误
+function normalizeData(data){
+  if(!data || !Array.isArray(data.categories) || !Array.isArray(data.goals)) throw new Error('格式不对');
+  if(!data.baseCurrency) data.baseCurrency = 'NTD';
+  if(!data.rates) data.rates = { NTD: 1, MYR: 8 };
+  data.rates[data.baseCurrency] = 1; // 本位币汇率永远是 1（修复旧版「添加币种」可能把它盖掉的问题）
+  if(!data.secondaryCurrency || data.rates[data.secondaryCurrency]===undefined){
+    data.secondaryCurrency = data.rates.MYR ? 'MYR' : data.baseCurrency;
+  }
+  if(!Array.isArray(data.history)) data.history = [];
+  if(typeof data.unallocated !== 'number' || isNaN(data.unallocated)) data.unallocated = 0;
+  data.categories.forEach(c=>{
+    if(c.monthlyPlan===undefined) c.monthlyPlan = 0;
+    if(c.monthlyPercent===undefined) c.monthlyPercent = 0;
+    if(!c.notes) c.notes = [];
+  });
+  data.goals.forEach(migrateGoal);
+  return data;
+}
+
 function load(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return defaultState();
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return defaultState();
-    const data = JSON.parse(raw);
-    if(!data.rates) data.rates = { NTD: 1, MYR: 8 };
-    data.rates[data.baseCurrency] = 1; // 本位币汇率永远是 1（修复旧版「添加币种」可能把它盖掉的问题）
-    if(!data.secondaryCurrency) data.secondaryCurrency = data.rates.MYR ? 'MYR' : data.baseCurrency;
-    if(!data.history) data.history = [];
-    if(typeof data.unallocated !== 'number' || isNaN(data.unallocated)) data.unallocated = 0;
-    data.categories.forEach(c=>{
-      if(c.monthlyPlan===undefined) c.monthlyPlan = 0;
-      if(c.monthlyPercent===undefined) c.monthlyPercent = 0;
-      if(!c.notes) c.notes = [];
-    });
-    data.goals.forEach(migrateGoal);
-    return data;
+    return normalizeData(JSON.parse(raw));
   }catch(e){
+    // 读不出来时先把原始数据另存一份，避免下一次保存把它覆盖掉
+    try{ localStorage.setItem(STORAGE_KEY + '_broken_' + Date.now(), raw); }catch(_){}
+    alert('读取记账数据时出错，已另外保留一份原始数据。建议导入最近的备份。');
     return defaultState();
   }
 }
@@ -370,7 +381,15 @@ function dualHtml(parts, cssClass){
 }
 
 /* ---------- 渲染 ---------- */
-function render(){
+// 目标的期限文字：本月到期不算「已到期」，过了这个月才算
+function goalTimeText(monthsRemaining){
+  if(monthsRemaining < 0) return '已过期';
+  if(monthsRemaining === 0) return '本月到期';
+  return `剩 ${monthsRemaining} 个月`;
+}
+
+// 顶部总资产与目标提醒（单独拆出来，改汇率时只刷新这里，不会打断正在输入的栏位）
+function renderHeader(){
   document.getElementById('baseCurrencyLabel').textContent = state.baseCurrency;
   const catTotal = state.categories.reduce((sum,c)=> sum + toBase(c.balance, c.currency), 0);
   const pool = state.unallocated || 0;
@@ -389,8 +408,12 @@ function render(){
     .sort((a,b)=>a.monthsRemaining-b.monthsRemaining)[0];
   const upcomingShortfall = upcoming ? dualPartsForBase(upcoming.shortfall) : null;
   document.getElementById('goalAlert').textContent = upcoming
-    ? `最近目标:"${upcoming.name}" 还差 ${upcomingShortfall.primary}${upcomingShortfall.secondary?'（≈'+upcomingShortfall.secondary+'）':''}，${upcoming.monthsRemaining<=0?'已到期':'剩 '+upcoming.monthsRemaining+' 个月'}`
+    ? `最近目标:"${upcoming.name}" 还差 ${upcomingShortfall.primary}${upcomingShortfall.secondary?'（≈'+upcomingShortfall.secondary+'）':''}，${goalTimeText(upcoming.monthsRemaining)}`
     : (state.goals.length ? '所有目标已达成 🎉' : '');
+}
+
+function render(){
+  renderHeader();
 
   document.querySelectorAll('nav.tabbar button').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.tab===activeTab);
@@ -562,7 +585,11 @@ function goalCardHtml(gRaw){
         ${g.shortfall>0 ? '还差 '+shortfallParts.primary+(shortfallParts.secondary?'（≈'+shortfallParts.secondary+'）':'') : '已达成 ✓'}
       </div>
     </div>
-    ${g.shortfall>0 ? `<div class="sub">${g.monthsRemaining<=0?'已到期，建议尽快补足':'剩 '+g.monthsRemaining+' 个月，平均每月需存 '+monthlyParts.primary+(monthlyParts.secondary?'（≈'+monthlyParts.secondary+'）':'')}</div>` : ''}
+    ${g.shortfall>0 ? `<div class="sub">${
+      g.monthsRemaining<0 ? '已过期，建议尽快补足'
+      : g.monthsRemaining===0 ? '本月到期，这个月需要补足 '+shortfallParts.primary+(shortfallParts.secondary?'（≈'+shortfallParts.secondary+'）':'')
+      : '剩 '+g.monthsRemaining+' 个月，平均每月需存 '+monthlyParts.primary+(monthlyParts.secondary?'（≈'+monthlyParts.secondary+'）':'')
+    }</div>` : ''}
     ${g.notes && g.notes.length ? `<div class="sub" style="margin-top:4px;">明细 ${g.notes.length} 项 ・ 合计 ${fmt(notesSum)} ${g.currency}</div>` : ''}
     <div class="modal-actions" style="margin-top:12px;">
       <button class="pill-btn ghost" onclick="openGoalNotesModal('${g.id}')">明细备忘</button>
@@ -585,13 +612,14 @@ function renderHistory(){
   if(state.history.length===0){
     return `<div class="empty">还没有历史记录。<br>入账、支出或本月分配后会自动记录在这里。</div>`;
   }
-  // 本月收支小结：只统计真实进出（入账/存入/新建分类 vs 支出），内部划转与余额校正不算
+  // 本月收支小结：只统计真实进出（入账/外部存入 vs 支出）。
+  // 新建分类时填的初始余额是「本来就有的钱」，内部划转与余额校正也不是收支，都不算
   const ym = localDateStr().slice(0,7);
   let inBase = 0, outBase = 0;
   state.history.forEach(h=>{
     if(!h.date || !h.date.startsWith(ym)) return;
     const b = h.baseAmount !== undefined ? h.baseAmount : toBase(h.amount, h.currency);
-    if(h.type==='income' || h.type==='deposit' || h.type==='create'){ if(b>0) inBase += b; }
+    if(h.type==='income' || h.type==='deposit'){ if(b>0) inBase += b; }
     else if(h.type==='expense'){ outBase += Math.abs(b); }
   });
   const netBase = inBase - outBase;
@@ -603,7 +631,7 @@ function renderHistory(){
     <div class="row"><div class="sub">入账</div><div class="amount small" style="color:var(--accent);">${inBase>0?'+':''}${inParts.primary}${inParts.secondary?'（≈'+inParts.secondary+'）':''}</div></div>
     <div class="row"><div class="sub">支出</div><div class="amount small" style="color:var(--danger);">${outBase>0?'-':''}${outParts.primary}${outParts.secondary?'（≈'+outParts.secondary+'）':''}</div></div>
     <div class="row"><div class="sub">净变化</div><div class="amount small" style="color:${netBase>=0?'var(--accent)':'var(--danger)'};">${netBase>0?'+':(netBase<0?'-':'')}${netParts.primary}${netParts.secondary?'（≈'+netParts.secondary+'）':''}</div></div>
-    <div class="sub" style="margin-top:6px;">分配/划转属于内部转移，余额校正是修正记账误差，都不计入收支。</div>
+    <div class="sub" style="margin-top:6px;">分配/划转是内部转移，新建分类的初始余额是原本就有的钱，余额校正是修正记账误差，都不计入收支。</div>
   </div>`;
   let lastDate = null;
   state.history.forEach(h=>{
@@ -699,7 +727,21 @@ function deleteHistoryEntry(id){
   if(catGone){
     if(!confirm(`「${label} ${amtText}」对应的分类已被删除，无法还原金额，只能删掉这条记录。仍要删除吗？`)) return;
   }else{
-    if(!confirm(`删除「${label} ${amtText}」并同时还原这笔钱？\n余额／未分配池会一起回滚。`)) return;
+    // 预先算出还原后的余额，会变成负数就在确认框里讲清楚
+    const eff = entryEffects(h);
+    const warns = [];
+    const poolAfter = r2((state.unallocated||0) - eff.poolDelta);
+    if(eff.poolDelta && poolAfter < 0){
+      warns.push(`未分配池会变成 ${fmt(poolAfter)} ${state.baseCurrency}（这笔钱可能已经分配或花掉了）`);
+    }
+    const cat = h.categoryId ? state.categories.find(c=>c.id===h.categoryId) : null;
+    if(cat && eff.catDelta){
+      const d = (eff.catCurrency && eff.catCurrency!==cat.currency) ? fromBase(toBase(eff.catDelta, eff.catCurrency), cat.currency) : eff.catDelta;
+      const catAfter = r2(cat.balance - d);
+      if(catAfter < 0) warns.push(`「${cat.name}」会变成 ${fmt(catAfter)} ${cat.currency}（这笔钱可能已经花掉了）`);
+    }
+    const warnTxt = warns.length ? `\n\n⚠️ 注意：\n${warns.join('\n')}` : '';
+    if(!confirm(`删除「${label} ${amtText}」并同时还原这笔钱？\n余额／未分配池会一起回滚。${warnTxt}`)) return;
     revertHistoryEntry(h);
   }
   state.history = state.history.filter(x=>x.id!==id);
@@ -925,10 +967,17 @@ function openAddMoneyModal(id){
     </div>
   `);
 }
+// 从分类扣钱会扣成负数时先问一下（未分配池本来就有这个提醒，分类之前没有）
+function confirmCategoryOverspend(c, spendAmt){
+  const after = r2(c.balance - spendAmt);
+  if(after >= 0) return true;
+  return confirm(`「${c.name}」余额只有 ${fmt(c.balance)} ${c.currency}，支出后会变成 ${fmt(after)} ${c.currency}。\n仍要继续吗？`);
+}
 function submitAddMoney(id){
   const c = state.categories.find(x=>x.id===id);
   const amt = parseFloat(document.getElementById('f_amount').value);
-  if(isNaN(amt)) return alert('请输入金额');
+  if(isNaN(amt) || amt===0) return alert('请输入金额（支出填负数）');
+  if(amt<0 && !confirmCategoryOverspend(c, -amt)) return;
   if(amt>0 && document.getElementById('f_source').value==='pool'){
     const amtBase = toBase(amt, c.currency);
     if(amtBase > (state.unallocated||0) && !confirm('未分配池余额不足，划入后未分配会变成负数，仍要继续吗？')) return;
@@ -998,6 +1047,7 @@ function submitSpend(){
     const c = state.categories.find(x=>x.id===sourceId);
     if(!c) return;
     const catAmt = fromBase(amtBase, c.currency);
+    if(!confirmCategoryOverspend(c, catAmt)) return;
     c.balance -= catAmt;
     addHistoryEntry({type:'expense', categoryId:c.id, categoryName: label ? `${c.name}・${label}` : c.name, amount:-amt, currency,
       catDelta:-catAmt, catCurrency:c.currency, poolDelta:0});
@@ -1497,6 +1547,7 @@ function updateRate(code, value){
   if(isNaN(rate) || rate<=0 || code===state.baseCurrency) return;
   state.rates[code] = rate;
   save();
+  renderHeader();
 }
 
 function changeSecondaryCurrency(code){
@@ -1518,7 +1569,7 @@ function changeBaseCurrency(newBase){
 
 /* ---------- 备份 ---------- */
 function exportData(){
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const blob = new Blob([JSON.stringify({...state, exportedAt: new Date().toISOString()}, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -1531,19 +1582,22 @@ document.getElementById('importFile').addEventListener('change', (e)=>{
   if(!file) return;
   const reader = new FileReader();
   reader.onload = ()=>{
+    let data;
     try{
-      const data = JSON.parse(reader.result);
-      if(!data.categories || !data.goals || !data.rates) throw new Error('格式不对');
-      if(!data.history) data.history = [];
-      if(typeof data.unallocated !== 'number' || isNaN(data.unallocated)) data.unallocated = 0;
-      data.categories.forEach(c=>{ if(c.monthlyPlan===undefined) c.monthlyPlan=0; if(c.monthlyPercent===undefined) c.monthlyPercent=0; if(!c.notes) c.notes=[]; });
-      data.goals.forEach(migrateGoal);
-      state = data;
-      save(); render();
-      alert('导入成功');
+      data = normalizeData(JSON.parse(reader.result));
     }catch(err){
-      alert('导入失败：文件格式不正确');
+      return alert('导入失败：文件格式不正确');
     }
+    // 先让用户看清楚备份里是什么，再决定要不要覆盖
+    const fileTotal = (data.unallocated||0) + data.categories.reduce((s,c)=>s+c.balance*(data.rates[c.currency]!==undefined?data.rates[c.currency]:1),0);
+    const when = data.exportedAt ? `导出时间：${localDateStr(new Date(data.exportedAt))}\n` : '';
+    const msg = `这个备份里有：\n${when}分类 ${data.categories.length} 个、目标 ${data.goals.length} 个、历史记录 ${data.history.length} 笔\n总资产 ${fmt(fileTotal)} ${data.baseCurrency}\n\n导入会【完全覆盖】手机上现在的数据（分类 ${state.categories.length} 个、历史 ${state.history.length} 笔）。确定要导入吗？`;
+    if(!confirm(msg)) return;
+    try{ localStorage.setItem(STORAGE_KEY + '_before_import', JSON.stringify(state)); }catch(_){}
+    delete data.exportedAt;
+    state = data;
+    save(); render();
+    alert('导入成功');
   };
   reader.readAsText(file);
   e.target.value = '';
