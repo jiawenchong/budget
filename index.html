@@ -216,7 +216,7 @@
 <script>
 /* ---------- 数据层 ---------- */
 const STORAGE_KEY = 'budgetAppData_v1';
-const APP_VERSION = '2026.10.13-2';
+const APP_VERSION = '2026.10.15';
 
 const PRESET_CATEGORIES = [
   'Savings', 'Flight ticket', 'Parents', 'Commonwealth',
@@ -249,6 +249,15 @@ function defaultState(){
   };
 }
 
+// 旧版目标只能关联一个分类（linkedCategoryId），统一转成可多选的 linkedCategoryIds
+function migrateGoal(g){
+  if(!g.notes) g.notes = [];
+  if(!Array.isArray(g.linkedCategoryIds)){
+    g.linkedCategoryIds = g.linkedCategoryId ? [g.linkedCategoryId] : [];
+  }
+  delete g.linkedCategoryId;
+}
+
 function load(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -264,9 +273,7 @@ function load(){
       if(c.monthlyPercent===undefined) c.monthlyPercent = 0;
       if(!c.notes) c.notes = [];
     });
-    data.goals.forEach(g=>{
-      if(!g.notes) g.notes = [];
-    });
+    data.goals.forEach(migrateGoal);
     return data;
   }catch(e){
     return defaultState();
@@ -462,31 +469,44 @@ function renderCategories(){
   `;}).join('');
 }
 
-// 同一分类被多个目标关联时，按到期日由近到远依次分配该分类余额，避免同一笔钱被重复计入多个目标
-function goalSavedBase(g){
-  if(!g.linkedCategoryId){
-    return toBase(g.manualSaved||0, g.currency);
-  }
-  const cat = state.categories.find(c=>c.id===g.linkedCategoryId);
-  if(!cat) return 0;
-  const siblings = state.goals
-    .filter(x=>x.linkedCategoryId===g.linkedCategoryId)
-    .slice()
-    .sort((a,b)=>a.deadline.localeCompare(b.deadline));
-  let available = toBase(cat.balance, cat.currency);
-  let result = 0;
-  for(const sib of siblings){
-    const target = toBase(sib.targetAmount, sib.currency);
-    const allocated = Math.min(available, target);
-    available -= allocated;
-    if(sib.id===g.id){ result = allocated; break; }
-  }
+// 目标可关联多个分类：所有目标按到期日由近到远依次取用分类余额，同一笔钱不会被重复计入多个目标。
+// 每个目标优先取「后面目标用不到」的分类，再取共用分类，尽量把共用的钱留给后面的目标。
+function computeGoalAllocations(){
+  const remaining = {};
+  state.categories.forEach(c=>{ remaining[c.id] = Math.max(0, toBase(c.balance, c.currency)); });
+  const order = state.goals.map((g,i)=>({g,i}))
+    .sort((a,b)=>a.g.deadline.localeCompare(b.g.deadline) || a.i-b.i)
+    .map(x=>x.g);
+  const result = {};
+  order.forEach((g, idx)=>{
+    const ids = (g.linkedCategoryIds||[]).filter(id=>remaining[id]!==undefined);
+    if(ids.length===0){
+      result[g.id] = {savedBase: toBase(g.manualSaved||0, g.currency), parts:[], linked:false};
+      return;
+    }
+    const later = order.slice(idx+1);
+    const laterUse = id => later.filter(x=>(x.linkedCategoryIds||[]).includes(id)).length;
+    const sorted = ids.map((id,k)=>({id, k, u:laterUse(id)})).sort((a,b)=>a.u-b.u || a.k-b.k);
+    let need = toBase(g.targetAmount, g.currency);
+    let saved = 0;
+    const parts = [];
+    sorted.forEach(({id})=>{
+      if(need<=0) return;
+      const take = Math.min(remaining[id], need);
+      if(take>0){
+        remaining[id] -= take; need -= take; saved += take;
+        parts.push({catId:id, base:take});
+      }
+    });
+    result[g.id] = {savedBase: saved, parts, linked:true};
+  });
   return result;
 }
 
 function computeGoal(g){
   const targetBase = toBase(g.targetAmount, g.currency);
-  const savedBase = goalSavedBase(g);
+  const alloc = computeGoalAllocations()[g.id] || {savedBase:0, parts:[], linked:false};
+  const savedBase = alloc.savedBase;
   const shortfall = targetBase - savedBase;
   const now = new Date();
   const [dy, dm] = g.deadline.split('-').map(Number);
@@ -494,14 +514,19 @@ function computeGoal(g){
   const monthlyNeeded = shortfall>0 ? shortfall/Math.max(monthsRemaining,1) : 0;
   return {
     ...g, targetBase, savedBase, shortfall, monthsRemaining, monthlyNeeded,
+    parts: alloc.parts, linked: alloc.linked,
     pct: targetBase>0 ? Math.min(100, Math.max(0,(savedBase/targetBase)*100)) : 0
   };
 }
 
 function goalCardHtml(gRaw){
   const g = computeGoal(gRaw);
-  const linkedCat = g.linkedCategoryId ? state.categories.find(c=>c.id===g.linkedCategoryId) : null;
-  const sharedCount = g.linkedCategoryId ? state.goals.filter(x=>x.linkedCategoryId===g.linkedCategoryId).length : 1;
+  const linkedCats = (g.linkedCategoryIds||[]).map(id=>state.categories.find(c=>c.id===id)).filter(Boolean);
+  const sharedCats = linkedCats.filter(c=>state.goals.some(x=>x.id!==g.id && (x.linkedCategoryIds||[]).includes(c.id)));
+  const breakdown = g.parts.map(p=>{
+    const c = state.categories.find(x=>x.id===p.catId);
+    return `${escapeHtml(c?c.name:'')} ${dualPartsForBase(p.base).primary}`;
+  }).join('、');
   const targetParts = dualPartsForCurrency(g.targetAmount, g.currency);
   const savedParts = dualPartsForBase(g.savedBase);
   const shortfallParts = dualPartsForBase(g.shortfall);
@@ -512,8 +537,9 @@ function goalCardHtml(gRaw){
       <div class="name">${escapeHtml(g.name)}</div>
       <div class="amount small">${g.deadline} 前</div>
     </div>
-    <div class="sub">目标 ${targetParts.primary}${targetParts.secondary?` ≈ ${targetParts.secondary}`:''}${linkedCat?` ・ 关联分类「${escapeHtml(linkedCat.name)}」`:''}</div>
-    ${sharedCount>1 ? `<div class="sub">该分类由 ${sharedCount} 个目标共用余额，按到期日由近到远依次分配</div>` : ''}
+    <div class="sub">目标 ${targetParts.primary}${targetParts.secondary?` ≈ ${targetParts.secondary}`:''}${linkedCats.length?` ・ 关联分类「${linkedCats.map(c=>escapeHtml(c.name)).join('」「')}」`:''}</div>
+    ${breakdown ? `<div class="sub">取自：${breakdown}</div>` : ''}
+    ${sharedCats.length ? `<div class="sub">「${sharedCats.map(c=>escapeHtml(c.name)).join('」「')}」也被其他目标使用，按到期日先到先用</div>` : ''}
     <div class="progress-bar"><div class="${g.shortfall<=0?'':''}" style="width:${g.pct}%"></div></div>
     <div class="row" style="margin-top:8px;">
       <div class="sub">已存 ≈ ${savedParts.primary}${savedParts.secondary?`（≈${savedParts.secondary}）`:''} / ${fmt(g.targetBase)} ${state.baseCurrency}</div>
@@ -540,7 +566,7 @@ function renderGoals(){
   return state.goals.map(g=>goalCardHtml(g)).join('');
 }
 
-const HISTORY_TYPE_LABEL = {deposit:'存入', expense:'支出', allocation:'本月分配', create:'新建分类', income:'入账', transfer:'从未分配池划入'};
+const HISTORY_TYPE_LABEL = {deposit:'存入', expense:'支出', allocation:'本月分配', create:'新建分类', income:'入账', transfer:'从未分配池划入', release:'删除分类，余额转入未分配池'};
 
 function renderHistory(){
   if(state.history.length===0){
@@ -594,6 +620,27 @@ function renderHistory(){
   return html;
 }
 // 撤销某条历史记录对分类余额/未分配池的影响
+// 撤销「删除分类」：把分类原样恢复，余额从未分配池拿回去，并重新关联原来的目标
+function restoreDeletedCategory(h){
+  const s = h.snapshot;
+  if(!s || state.categories.some(c=>c.id===s.id)) return '';
+  let percent = s.monthlyPercent||0;
+  let note = '';
+  if(percent > percentLeft(null)){
+    note = `\n（原本的 ${fmt(percent)}% 会让百分比合计超过 100%，已改为 0%，需要的话再去编辑）`;
+    percent = 0;
+  }
+  state.categories.push({
+    id:s.id, name:s.name, balance:h.amount, currency:s.currency,
+    monthlyPlan:s.monthlyPlan||0, monthlyPercent:percent, notes:s.notes||[]
+  });
+  state.unallocated = (state.unallocated||0) - toBase(h.amount, h.currency);
+  (s.linkedGoalIds||[]).forEach(gid=>{
+    const g = state.goals.find(x=>x.id===gid);
+    if(g && !g.linkedCategoryIds.includes(s.id)) g.linkedCategoryIds.push(s.id);
+  });
+  return `已恢复分类「${s.name}」。${note}`;
+}
 function revertHistoryEntry(h){
   const amtBase = toBase(h.amount, h.currency); // 带符号：入账/存入为正，支出为负
   if(!h.categoryId){
@@ -614,6 +661,14 @@ function deleteHistoryEntry(id){
   if(!h) return;
   const label = HISTORY_TYPE_LABEL[h.type] || h.type;
   const amtText = dualPartsForCurrency(Math.abs(h.amount), h.currency).primary;
+  if(h.type==='release'){
+    if(!confirm(`删除这条记录会恢复分类「${h.categoryName}」，并把 ${dualPartsForCurrency(h.amount, h.currency).primary} 从未分配池拿回去。确定吗？`)) return;
+    const msg = restoreDeletedCategory(h);
+    state.history = state.history.filter(x=>x.id!==id);
+    save(); render();
+    if(msg) alert(msg);
+    return;
+  }
   const catGone = h.categoryId && !state.categories.find(c=>c.id===h.categoryId);
   if(catGone){
     if(!confirm(`「${label} ${amtText}」对应的分类已被删除，无法还原金额，只能删掉这条记录。仍要删除吗？`)) return;
@@ -775,9 +830,26 @@ function submitEditCategory(id){
   save(); closeModal(); render();
 }
 function deleteCategory(id){
-  if(!confirm('确定删除该分类吗？')) return;
+  const c = state.categories.find(x=>x.id===id);
+  if(!c) return;
+  const amtText = dualPartsForCurrency(c.balance, c.currency).primary;
+  const msg = c.balance!==0
+    ? `确定删除分类「${c.name}」吗？\n余额 ${amtText} 会转入未分配池。\n（之后在历史记录里删掉这笔，可以把分类恢复回来）`
+    : `确定删除分类「${c.name}」吗？`;
+  if(!confirm(msg)) return;
+  const linkedGoalIds = state.goals.filter(g=>(g.linkedCategoryIds||[]).includes(id)).map(g=>g.id);
+  if(c.balance!==0){
+    state.unallocated = (state.unallocated||0) + toBase(c.balance, c.currency);
+    addHistoryEntry({
+      type:'release', categoryId:c.id, categoryName:c.name, amount:c.balance, currency:c.currency,
+      snapshot:{
+        id:c.id, name:c.name, currency:c.currency, monthlyPlan:c.monthlyPlan||0,
+        monthlyPercent:c.monthlyPercent||0, notes:c.notes||[], linkedGoalIds
+      }
+    });
+  }
   state.categories = state.categories.filter(x=>x.id!==id);
-  state.goals.forEach(g=>{ if(g.linkedCategoryId===id) g.linkedCategoryId=null; });
+  state.goals.forEach(g=>{ g.linkedCategoryIds = (g.linkedCategoryIds||[]).filter(x=>x!==id); });
   save(); render();
 }
 
@@ -878,20 +950,33 @@ function submitSpend(){
   save(); closeModal(); render();
 }
 
+function linkedCategoryCheckboxes(selectedIds){
+  if(state.categories.length===0) return '<div class="sub">还没有分类，可以先手动填写已存金额。</div>';
+  return state.categories.map(c=>`
+    <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text);margin-bottom:8px;">
+      <input type="checkbox" class="f_linked_cb" value="${c.id}" ${selectedIds.includes(c.id)?'checked':''} style="width:auto;margin:0;">
+      <span>${escapeHtml(c.name)}</span>
+      <span class="sub" style="margin:0;">${fmt(c.balance)} ${c.currency}</span>
+    </label>`).join('');
+}
+function readLinkedCategoryIds(){
+  return Array.from(document.querySelectorAll('.f_linked_cb:checked')).map(x=>x.value);
+}
+function goalFormFields(g){
+  return `
+    <div class="field"><label>目标名称</label><input id="f_name" ${g?`value="${escapeHtml(g.name)}"`:'placeholder="例如：B 项目"'}></div>
+    <div class="field"><label>目标金额</label><input id="f_amount" type="number" step="0.01" value="${g?g.targetAmount:0}"></div>
+    <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(g?g.currency:state.baseCurrency)}</select></div>
+    <div class="field"><label>需要凑齐的月份</label><input id="f_deadline" type="month" value="${g?g.deadline:''}"></div>
+    <div class="field"><label>关联分类（可多选，已存金额 = 这些分类的余额加起来；和其他目标共用的分类按到期日先到先用）</label>
+      ${linkedCategoryCheckboxes(g?(g.linkedCategoryIds||[]):[])}
+    </div>
+    <div class="field"><label>已存金额（没有勾选任何分类时使用）</label><input id="f_manualSaved" type="number" step="0.01" value="${g?(g.manualSaved||0):0}"></div>`;
+}
 function openAddGoalModal(){
   openModal(`
     <h2>新建目标</h2>
-    <div class="field"><label>目标名称</label><input id="f_name" placeholder="例如：B 项目"></div>
-    <div class="field"><label>目标金额</label><input id="f_amount" type="number" step="0.01" value="0"></div>
-    <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(state.baseCurrency)}</select></div>
-    <div class="field"><label>需要凑齐的月份</label><input id="f_deadline" type="month"></div>
-    <div class="field"><label>关联分类（可选，已存金额自动取该分类余额）</label>
-      <select id="f_linked">
-        <option value="">不关联，手动填写已存金额</option>
-        ${state.categories.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}
-      </select>
-    </div>
-    <div class="field" id="f_manualSavedWrap"><label>已存金额</label><input id="f_manualSaved" type="number" step="0.01" value="0"></div>
+    ${goalFormFields(null)}
     <div class="modal-actions">
       <button class="cancel" onclick="closeModal()">取消</button>
       <button class="submit" onclick="submitAddGoal()">保存</button>
@@ -903,11 +988,11 @@ function submitAddGoal(){
   const targetAmount = parseFloat(document.getElementById('f_amount').value) || 0;
   const currency = document.getElementById('f_currency').value;
   const deadline = document.getElementById('f_deadline').value;
-  const linkedCategoryId = document.getElementById('f_linked').value || null;
+  const linkedCategoryIds = readLinkedCategoryIds();
   const manualSaved = parseFloat(document.getElementById('f_manualSaved').value) || 0;
   if(!name) return alert('请输入目标名称');
   if(!deadline) return alert('请选择月份');
-  state.goals.push({id:uid(), name, targetAmount, currency, deadline, linkedCategoryId, manualSaved, notes:[]});
+  state.goals.push({id:uid(), name, targetAmount, currency, deadline, linkedCategoryIds, manualSaved, notes:[]});
   save(); closeModal(); render();
 }
 
@@ -916,17 +1001,7 @@ function openEditGoalModal(id){
   if(!g) return;
   openModal(`
     <h2>编辑目标</h2>
-    <div class="field"><label>目标名称</label><input id="f_name" value="${escapeHtml(g.name)}"></div>
-    <div class="field"><label>目标金额</label><input id="f_amount" type="number" step="0.01" value="${g.targetAmount}"></div>
-    <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(g.currency)}</select></div>
-    <div class="field"><label>需要凑齐的月份</label><input id="f_deadline" type="month" value="${g.deadline}"></div>
-    <div class="field"><label>关联分类</label>
-      <select id="f_linked">
-        <option value="">不关联，手动填写已存金额</option>
-        ${state.categories.map(c=>`<option value="${c.id}" ${g.linkedCategoryId===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}
-      </select>
-    </div>
-    <div class="field"><label>已存金额（未关联分类时使用）</label><input id="f_manualSaved" type="number" step="0.01" value="${g.manualSaved||0}"></div>
+    ${goalFormFields(g)}
     <div class="modal-actions">
       <button class="cancel" onclick="closeModal()">取消</button>
       <button class="submit" onclick="submitEditGoal('${id}')">保存</button>
@@ -939,7 +1014,7 @@ function submitEditGoal(id){
   g.targetAmount = parseFloat(document.getElementById('f_amount').value) || 0;
   g.currency = document.getElementById('f_currency').value;
   g.deadline = document.getElementById('f_deadline').value || g.deadline;
-  g.linkedCategoryId = document.getElementById('f_linked').value || null;
+  g.linkedCategoryIds = readLinkedCategoryIds();
   g.manualSaved = parseFloat(document.getElementById('f_manualSaved').value) || 0;
   save(); closeModal(); render();
 }
@@ -1290,7 +1365,7 @@ document.getElementById('importFile').addEventListener('change', (e)=>{
       if(!data.history) data.history = [];
       if(typeof data.unallocated !== 'number' || isNaN(data.unallocated)) data.unallocated = 0;
       data.categories.forEach(c=>{ if(c.monthlyPlan===undefined) c.monthlyPlan=0; if(c.monthlyPercent===undefined) c.monthlyPercent=0; if(!c.notes) c.notes=[]; });
-      data.goals.forEach(g=>{ if(!g.notes) g.notes=[]; });
+      data.goals.forEach(migrateGoal);
       state = data;
       save(); render();
       alert('导入成功');
