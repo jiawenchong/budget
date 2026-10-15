@@ -216,7 +216,7 @@
 <script>
 /* ---------- 数据层 ---------- */
 const STORAGE_KEY = 'budgetAppData_v1';
-const APP_VERSION = '2026.10.15';
+const APP_VERSION = '2026.10.15-2';
 
 const PRESET_CATEGORIES = [
   'Savings', 'Flight ticket', 'Parents', 'Commonwealth',
@@ -264,7 +264,7 @@ function load(){
     if(!raw) return defaultState();
     const data = JSON.parse(raw);
     if(!data.rates) data.rates = { NTD: 1, MYR: 8 };
-    if(!data.rates[data.baseCurrency]) data.rates[data.baseCurrency] = 1;
+    data.rates[data.baseCurrency] = 1; // 本位币汇率永远是 1（修复旧版「添加币种」可能把它盖掉的问题）
     if(!data.secondaryCurrency) data.secondaryCurrency = data.rates.MYR ? 'MYR' : data.baseCurrency;
     if(!data.history) data.history = [];
     if(typeof data.unallocated !== 'number' || isNaN(data.unallocated)) data.unallocated = 0;
@@ -280,15 +280,27 @@ function load(){
   }
 }
 
+// 本地日期 YYYY-MM-DD（toISOString 是 UTC，台湾早上 8 点前会变成前一天）
+function localDateStr(d){
+  d = d || new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function r2(n){ return Math.round((n||0)*100)/100; }
+
+// 记账时把这笔对「分类余额」和「未分配池」的实际影响一起存下来（catDelta 为分类币种，poolDelta 为本位币），
+// 之后删除记录时按当时的影响原样撤销，不受后来改汇率影响
 function addHistoryEntry(entry){
-  state.history.unshift({
-    id: uid(),
-    date: new Date().toISOString().slice(0,10),
-    ...entry
-  });
+  const e = {id: uid(), date: localDateStr(), ...entry};
+  e.baseAmount = r2(entry.baseAmount !== undefined ? entry.baseAmount : toBase(entry.amount, entry.currency));
+  if(e.catDelta !== undefined) e.catDelta = r2(e.catDelta);
+  if(e.poolDelta !== undefined) e.poolDelta = r2(e.poolDelta);
+  state.history.unshift(e);
 }
 
 function save(){
+  // 统一四舍五入到分，避免浮点误差慢慢累积（例如显示 0 但其实是 -0.0000001）
+  state.unallocated = r2(state.unallocated);
+  state.categories.forEach(c=>{ c.balance = r2(c.balance); });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
@@ -408,6 +420,7 @@ function renderOverview(){
       </div>
       <div style="flex-shrink:0;margin-left:10px;">${dualHtml(dualPartsForBase(state.unallocated||0), 'amount')}</div>
     </div>
+    <button class="link-text" style="margin-top:10px;" onclick="openReconcileModal()">对账：和银行余额核对、校正金额 ›</button>
   </div>`;
   if(state.categories.length===0 && state.goals.length===0){
     return html + `<div class="empty">还没有分类。<br>点右下角 “+” 添加第一个分类吧。</div>`;
@@ -566,18 +579,18 @@ function renderGoals(){
   return state.goals.map(g=>goalCardHtml(g)).join('');
 }
 
-const HISTORY_TYPE_LABEL = {deposit:'存入', expense:'支出', allocation:'本月分配', create:'新建分类', income:'入账', transfer:'从未分配池划入', release:'删除分类，余额转入未分配池'};
+const HISTORY_TYPE_LABEL = {deposit:'存入', expense:'支出', allocation:'本月分配', create:'新建分类', income:'入账', transfer:'从未分配池划入', release:'删除分类，余额转入未分配池', adjust:'余额校正'};
 
 function renderHistory(){
   if(state.history.length===0){
     return `<div class="empty">还没有历史记录。<br>入账、支出或本月分配后会自动记录在这里。</div>`;
   }
-  // 本月收支小结：只统计真实进出（入账/存入/新建分类 vs 支出），内部划转不算
-  const ym = new Date().toISOString().slice(0,7);
+  // 本月收支小结：只统计真实进出（入账/存入/新建分类 vs 支出），内部划转与余额校正不算
+  const ym = localDateStr().slice(0,7);
   let inBase = 0, outBase = 0;
   state.history.forEach(h=>{
     if(!h.date || !h.date.startsWith(ym)) return;
-    const b = toBase(h.amount, h.currency);
+    const b = h.baseAmount !== undefined ? h.baseAmount : toBase(h.amount, h.currency);
     if(h.type==='income' || h.type==='deposit' || h.type==='create'){ if(b>0) inBase += b; }
     else if(h.type==='expense'){ outBase += Math.abs(b); }
   });
@@ -590,7 +603,7 @@ function renderHistory(){
     <div class="row"><div class="sub">入账</div><div class="amount small" style="color:var(--accent);">${inBase>0?'+':''}${inParts.primary}${inParts.secondary?'（≈'+inParts.secondary+'）':''}</div></div>
     <div class="row"><div class="sub">支出</div><div class="amount small" style="color:var(--danger);">${outBase>0?'-':''}${outParts.primary}${outParts.secondary?'（≈'+outParts.secondary+'）':''}</div></div>
     <div class="row"><div class="sub">净变化</div><div class="amount small" style="color:${netBase>=0?'var(--accent)':'var(--danger)'};">${netBase>0?'+':(netBase<0?'-':'')}${netParts.primary}${netParts.secondary?'（≈'+netParts.secondary+'）':''}</div></div>
-    <div class="sub" style="margin-top:6px;">分配/划转属于内部转移，不计入收支。</div>
+    <div class="sub" style="margin-top:6px;">分配/划转属于内部转移，余额校正是修正记账误差，都不计入收支。</div>
   </div>`;
   let lastDate = null;
   state.history.forEach(h=>{
@@ -634,26 +647,39 @@ function restoreDeletedCategory(h){
     id:s.id, name:s.name, balance:h.amount, currency:s.currency,
     monthlyPlan:s.monthlyPlan||0, monthlyPercent:percent, notes:s.notes||[]
   });
-  state.unallocated = (state.unallocated||0) - toBase(h.amount, h.currency);
+  state.unallocated = (state.unallocated||0) - (h.poolDelta !== undefined ? h.poolDelta : toBase(h.amount, h.currency));
   (s.linkedGoalIds||[]).forEach(gid=>{
     const g = state.goals.find(x=>x.id===gid);
     if(g && !g.linkedCategoryIds.includes(s.id)) g.linkedCategoryIds.push(s.id);
   });
   return `已恢复分类「${s.name}」。${note}`;
 }
-function revertHistoryEntry(h){
-  const amtBase = toBase(h.amount, h.currency); // 带符号：入账/存入为正，支出为负
-  if(!h.categoryId){
-    // 只动未分配池：入账(+) 与 未分配池支出(-)
-    state.unallocated = (state.unallocated||0) - amtBase;
-    return true;
+// 一笔记录对分类/未分配池的影响。新记录直接读存下的值；旧记录（没有存）才按现在的汇率推算
+function entryEffects(h){
+  if(h.catDelta !== undefined || h.poolDelta !== undefined){
+    return {catDelta: h.catDelta || 0, catCurrency: h.catCurrency, poolDelta: h.poolDelta || 0};
   }
+  const amtBase = toBase(h.amount, h.currency);
+  if(!h.categoryId) return {catDelta:0, poolDelta:amtBase};
   const cat = state.categories.find(c=>c.id===h.categoryId);
-  if(!cat) return false; // 分类已被删除，无法还原
-  cat.balance -= fromBase(amtBase, cat.currency);
-  if(h.type==='transfer' || h.type==='allocation'){
-    state.unallocated = (state.unallocated||0) + amtBase; // 内部划转：钱退回未分配池
+  return {
+    catDelta: cat ? fromBase(amtBase, cat.currency) : 0,
+    catCurrency: cat ? cat.currency : h.currency,
+    poolDelta: (h.type==='transfer' || h.type==='allocation') ? -amtBase : 0
+  };
+}
+function revertHistoryEntry(h){
+  const eff = entryEffects(h);
+  if(eff.catDelta){
+    const cat = state.categories.find(c=>c.id===h.categoryId);
+    if(!cat) return false; // 分类已被删除，无法还原
+    // 分类后来改过币种时，把当时的变动换算成现在的币种
+    const delta = (eff.catCurrency && eff.catCurrency!==cat.currency)
+      ? fromBase(toBase(eff.catDelta, eff.catCurrency), cat.currency)
+      : eff.catDelta;
+    cat.balance -= delta;
   }
+  state.unallocated = (state.unallocated||0) - eff.poolDelta;
   return true;
 }
 function deleteHistoryEntry(id){
@@ -797,7 +823,7 @@ function submitAddCategory(){
   const newCat = {id:uid(), name, balance, currency, monthlyPlan, monthlyPercent, notes:[]};
   state.categories.push(newCat);
   if(balance!==0){
-    addHistoryEntry({type:'create', categoryId:newCat.id, categoryName:name, amount:balance, currency});
+    addHistoryEntry({type:'create', categoryId:newCat.id, categoryName:name, amount:balance, currency, catDelta:balance, catCurrency:currency});
   }
   save(); closeModal(); render();
 }
@@ -808,8 +834,8 @@ function openEditCategoryModal(id){
   openModal(`
     <h2>编辑分类</h2>
     <div class="field"><label>名称</label><input id="f_name" value="${escapeHtml(c.name)}"></div>
-    <div class="field"><label>余额</label><input id="f_balance" type="number" step="0.01" value="${c.balance}"></div>
-    <div class="field"><label>币种</label><select id="f_currency">${currencyOptions(c.currency)}</select></div>
+    <div class="field"><label>余额（直接改会记一笔「余额校正」，平常存钱/花钱请用「存入/支出」）</label><input id="f_balance" type="number" step="0.01" value="${c.balance}"></div>
+    <div class="field"><label>币种（改币种会按汇率自动换算金额）</label><select id="f_currency" data-prev="${c.currency}" onchange="onEditCategoryCurrencyChange(this)">${currencyOptions(c.currency)}</select></div>
     <div class="field"><label>每月固定分配金额（按金额比例分配时使用，可不填）</label><input id="f_monthlyPlan" type="number" step="0.01" value="${c.monthlyPlan||0}"></div>
     <div class="field"><label>每月分配百分比 %（这个分类最多可填 ${fmt(percentLeft(c.id))}%，可不填）</label><input id="f_monthlyPercent" type="number" step="0.1" min="0" max="${percentLeft(c.id)}" value="${c.monthlyPercent||0}"></div>
     <div class="modal-actions">
@@ -818,15 +844,42 @@ function openEditCategoryModal(id){
     </div>
   `);
 }
+// 编辑分类时切换币种：把表单里的余额、每月固定金额按汇率换算成新币种
+function onEditCategoryCurrencyChange(sel){
+  const prev = sel.dataset.prev, next = sel.value;
+  ['f_balance','f_monthlyPlan'].forEach(fid=>{
+    const inp = document.getElementById(fid);
+    const v = parseFloat(inp.value) || 0;
+    inp.value = r2(fromBase(toBase(v, prev), next));
+  });
+  sel.dataset.prev = next;
+}
 function submitEditCategory(id){
   const c = state.categories.find(x=>x.id===id);
   const pErr = percentError(parseFloat(document.getElementById('f_monthlyPercent').value) || 0, id);
   if(pErr) return alert(pErr);
-  c.name = document.getElementById('f_name').value.trim() || c.name;
-  c.balance = parseFloat(document.getElementById('f_balance').value) || 0;
-  c.currency = document.getElementById('f_currency').value;
+  const newName = document.getElementById('f_name').value.trim() || c.name;
+  const newCurrency = document.getElementById('f_currency').value;
+  const newBalance = r2(parseFloat(document.getElementById('f_balance').value) || 0);
+  // 只换币种时余额应该是这个数；和输入值的差额才是真的「改了钱」
+  const converted = r2(fromBase(toBase(c.balance, c.currency), newCurrency));
+  const delta = r2(newBalance - converted);
+  if(Math.abs(delta) >= 0.01){
+    const txt = `${fmt(converted)} → ${fmt(newBalance)} ${newCurrency}`;
+    if(!confirm(`余额 ${txt}\n会记一笔「余额校正」${delta>0?'+':''}${fmt(delta)} ${newCurrency}（之后删掉这条记录可以还原）。确定吗？`)) return;
+  }
+  if(newCurrency !== c.currency){
+    (c.notes||[]).forEach(n=>{ n.amount = r2(fromBase(toBase(n.amount, c.currency), newCurrency)); });
+  }
+  c.name = newName;
+  c.currency = newCurrency;
+  c.balance = newBalance;
   c.monthlyPlan = parseFloat(document.getElementById('f_monthlyPlan').value) || 0;
   c.monthlyPercent = parseFloat(document.getElementById('f_monthlyPercent').value) || 0;
+  if(Math.abs(delta) >= 0.01){
+    addHistoryEntry({type:'adjust', categoryId:c.id, categoryName:c.name, amount:delta, currency:newCurrency,
+      catDelta:delta, catCurrency:newCurrency, poolDelta:0});
+  }
   save(); closeModal(); render();
 }
 function deleteCategory(id){
@@ -839,9 +892,10 @@ function deleteCategory(id){
   if(!confirm(msg)) return;
   const linkedGoalIds = state.goals.filter(g=>(g.linkedCategoryIds||[]).includes(id)).map(g=>g.id);
   if(c.balance!==0){
-    state.unallocated = (state.unallocated||0) + toBase(c.balance, c.currency);
+    const releasedBase = toBase(c.balance, c.currency);
+    state.unallocated = (state.unallocated||0) + releasedBase;
     addHistoryEntry({
-      type:'release', categoryId:c.id, categoryName:c.name, amount:c.balance, currency:c.currency,
+      type:'release', categoryId:c.id, categoryName:c.name, amount:c.balance, currency:c.currency, poolDelta:releasedBase,
       snapshot:{
         id:c.id, name:c.name, currency:c.currency, monthlyPlan:c.monthlyPlan||0,
         monthlyPercent:c.monthlyPercent||0, notes:c.notes||[], linkedGoalIds
@@ -879,9 +933,11 @@ function submitAddMoney(id){
     const amtBase = toBase(amt, c.currency);
     if(amtBase > (state.unallocated||0) && !confirm('未分配池余额不足，划入后未分配会变成负数，仍要继续吗？')) return;
     state.unallocated = (state.unallocated||0) - amtBase;
-    addHistoryEntry({type:'transfer', categoryId:c.id, categoryName:c.name, amount:amt, currency:c.currency});
+    addHistoryEntry({type:'transfer', categoryId:c.id, categoryName:c.name, amount:amt, currency:c.currency,
+      catDelta:amt, catCurrency:c.currency, poolDelta:-amtBase});
   }else{
-    addHistoryEntry({type: amt>=0?'deposit':'expense', categoryId:c.id, categoryName:c.name, amount:amt, currency:c.currency});
+    addHistoryEntry({type: amt>=0?'deposit':'expense', categoryId:c.id, categoryName:c.name, amount:amt, currency:c.currency,
+      catDelta:amt, catCurrency:c.currency, poolDelta:0});
   }
   c.balance += amt;
   save(); closeModal(); render();
@@ -906,8 +962,9 @@ function submitIncome(){
   const currency = document.getElementById('f_currency').value;
   const label = document.getElementById('f_label').value.trim();
   if(isNaN(amt) || amt<=0) return alert('请输入大于 0 的金额');
-  state.unallocated = (state.unallocated||0) + toBase(amt, currency);
-  addHistoryEntry({type:'income', categoryId:null, categoryName: label || '未分配池', amount:amt, currency});
+  const amtBase = toBase(amt, currency);
+  state.unallocated = (state.unallocated||0) + amtBase;
+  addHistoryEntry({type:'income', categoryId:null, categoryName: label || '未分配池', amount:amt, currency, poolDelta:amtBase});
   save(); closeModal(); render();
 }
 
@@ -940,13 +997,113 @@ function submitSpend(){
   if(sourceId){
     const c = state.categories.find(x=>x.id===sourceId);
     if(!c) return;
-    c.balance -= fromBase(amtBase, c.currency);
-    addHistoryEntry({type:'expense', categoryId:c.id, categoryName: label ? `${c.name}・${label}` : c.name, amount:-amt, currency});
+    const catAmt = fromBase(amtBase, c.currency);
+    c.balance -= catAmt;
+    addHistoryEntry({type:'expense', categoryId:c.id, categoryName: label ? `${c.name}・${label}` : c.name, amount:-amt, currency,
+      catDelta:-catAmt, catCurrency:c.currency, poolDelta:0});
   }else{
     if(amtBase > (state.unallocated||0) && !confirm('未分配池余额不足，扣除后会变成负数，仍要继续吗？')) return;
     state.unallocated = (state.unallocated||0) - amtBase;
-    addHistoryEntry({type:'expense', categoryId:null, categoryName: label || '未分配池', amount:-amt, currency});
+    addHistoryEntry({type:'expense', categoryId:null, categoryName: label || '未分配池', amount:-amt, currency, poolDelta:-amtBase});
   }
+  save(); closeModal(); render();
+}
+
+/* ---------- 对账：把 App 里的金额校正成和银行一致 ---------- */
+function openReconcileModal(){
+  const base = state.baseCurrency;
+  const row = (kind, id, name, value, currency)=>`
+    <div class="row" style="margin-bottom:8px;">
+      <div class="name" style="font-size:14px;">${escapeHtml(name)}</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input class="recon-input" data-kind="${kind}" data-id="${id}" data-currency="${currency}" data-orig="${r2(value)}"
+          type="number" step="0.01" value="${r2(value)}" oninput="updateReconcileSummary()"
+          style="width:110px;text-align:right;padding:6px 8px;border-radius:8px;border:1px solid #e0e2e6;">
+        <span class="sub" style="margin:0;width:34px;">${currency}</span>
+      </div>
+    </div>`;
+  openModal(`
+    <h2>对账</h2>
+    <div class="sub" style="margin-bottom:12px;">打开银行 App，把台湾、马来西亚<b>所有账户</b>的钱加起来，填在下面。App 会算出差多少，你再决定差额放哪里。每一笔校正都会记在历史里，删掉那条记录就能还原。</div>
+    <div class="field"><label>${base} 账户实际合计（可不填）</label>
+      <input id="recon_bank" type="number" step="0.01" placeholder="例如 152340" oninput="updateReconcileSummary()">
+    </div>
+    ${state.secondaryCurrency!==base ? `<div class="field"><label>${state.secondaryCurrency} 账户实际合计（可不填，会按汇率 ${fmt(state.rates[state.secondaryCurrency]||1)} 换算）</label>
+      <input id="recon_bank2" type="number" step="0.01" placeholder="例如 3200" oninput="updateReconcileSummary()">
+    </div>` : ''}
+    <div class="sub" id="recon_summary" style="margin-bottom:10px;"></div>
+    <button class="pill-btn ghost" id="recon_fill_btn" style="width:100%;margin-bottom:14px;display:none;" onclick="reconcileDiffToPool()">把差额放进「未分配」</button>
+    <div class="section-title" style="margin-top:0;">各项金额（可直接改）</div>
+    ${row('pool', '', '未分配', state.unallocated||0, base)}
+    ${state.categories.map(c=>row('cat', c.id, c.name, c.balance, c.currency)).join('')}
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">取消</button>
+      <button class="submit" onclick="confirmReconcile()">确认校正</button>
+    </div>
+  `);
+  updateReconcileSummary();
+}
+function reconcileTotals(){
+  let before = 0, after = 0;
+  document.querySelectorAll('.recon-input').forEach(inp=>{
+    before += toBase(parseFloat(inp.dataset.orig)||0, inp.dataset.currency);
+    after += toBase(parseFloat(inp.value)||0, inp.dataset.currency);
+  });
+  const bankRaw = document.getElementById('recon_bank').value;
+  const bank2El = document.getElementById('recon_bank2');
+  const bank2Raw = bank2El ? bank2El.value : '';
+  const bank = (bankRaw==='' && bank2Raw==='') ? null
+    : r2((parseFloat(bankRaw)||0) + toBase(parseFloat(bank2Raw)||0, state.secondaryCurrency));
+  return {before:r2(before), after:r2(after), bank};
+}
+function updateReconcileSummary(){
+  const t = reconcileTotals();
+  const base = state.baseCurrency;
+  let txt = `App 原本总资产 ${fmt(t.before)} ${base}`;
+  if(Math.abs(t.after - t.before) >= 0.01) txt += ` → 校正后 ${fmt(t.after)} ${base}`;
+  const btn = document.getElementById('recon_fill_btn');
+  if(t.bank !== null){
+    const diff = r2(t.bank - t.after);
+    txt += `\n银行合计 ${fmt(t.bank)} ${base}`;
+    txt += Math.abs(diff) < 0.01
+      ? `\n✓ 和银行对上了`
+      : `\n和银行相比：App ${diff>0?'少了':'多了'} ${fmt(Math.abs(diff))} ${base}`;
+    btn.style.display = Math.abs(diff) < 0.01 ? 'none' : 'block';
+  }else{
+    btn.style.display = 'none';
+  }
+  const el = document.getElementById('recon_summary');
+  el.style.whiteSpace = 'pre-line';
+  el.textContent = txt;
+}
+function reconcileDiffToPool(){
+  const t = reconcileTotals();
+  if(t.bank === null) return;
+  const poolInp = document.querySelector('.recon-input[data-kind="pool"]');
+  poolInp.value = r2((parseFloat(poolInp.value)||0) + (t.bank - t.after));
+  updateReconcileSummary();
+}
+function confirmReconcile(){
+  const changes = [];
+  document.querySelectorAll('.recon-input').forEach(inp=>{
+    const delta = r2((parseFloat(inp.value)||0) - (parseFloat(inp.dataset.orig)||0));
+    if(Math.abs(delta) >= 0.01) changes.push({inp, delta});
+  });
+  if(changes.length===0){ closeModal(); return; }
+  const t = reconcileTotals();
+  if(!confirm(`共校正 ${changes.length} 项，总资产 ${fmt(t.before)} → ${fmt(t.after)} ${state.baseCurrency}。确定吗？`)) return;
+  changes.forEach(({inp, delta})=>{
+    if(inp.dataset.kind==='pool'){
+      state.unallocated = (state.unallocated||0) + delta;
+      addHistoryEntry({type:'adjust', categoryId:null, categoryName:'未分配池', amount:delta, currency:state.baseCurrency, poolDelta:delta});
+    }else{
+      const c = state.categories.find(x=>x.id===inp.dataset.id);
+      if(!c) return;
+      c.balance += delta;
+      addHistoryEntry({type:'adjust', categoryId:c.id, categoryName:c.name, amount:delta, currency:c.currency,
+        catDelta:delta, catCurrency:c.currency, poolDelta:0});
+    }
+  });
   save(); closeModal(); render();
 }
 
@@ -1166,12 +1323,13 @@ function generateAllocationSuggestion(){
   const totalCurrency = document.getElementById('alloc_currency').value;
   if(isNaN(totalAmt) || totalAmt<=0) return alert('请输入本月收入/总金额');
   const totalBase = toBase(totalAmt, totalCurrency);
-  let rows;
+  let rows, targetBase;
   if(mode==='percent'){
     const planned = state.categories.filter(c=>(c.monthlyPercent||0)>0);
     if(planned.length===0) return alert('还没有分类设了百分比。可以去「设置 → 套用百分比方案」一键建好。');
     const pUsed = percentUsed(null);
     if(pUsed > 100) return alert(`各分类百分比合计 ${fmt(pUsed)}%，超过 100%。\n请先到「分类」把百分比调低 ${fmt(pUsed-100)}%。`);
+    targetBase = totalBase * pUsed / 100;
     rows = planned.map(c=>{
       const suggestBase = totalBase * (c.monthlyPercent/100);
       return {
@@ -1183,6 +1341,7 @@ function generateAllocationSuggestion(){
     const planned = state.categories.filter(c=>c.monthlyPlan>0);
     if(planned.length===0) return alert('请先在「分类」里编辑分类，填好「每月固定分配金额」');
     const refTotalBase = planned.reduce((s,c)=>s+toBase(c.monthlyPlan,c.currency),0);
+    targetBase = totalBase;
     rows = planned.map(c=>{
       const suggestBase = (toBase(c.monthlyPlan,c.currency)/refTotalBase)*totalBase;
       return {
@@ -1190,6 +1349,13 @@ function generateAllocationSuggestion(){
         amount:Math.round((suggestBase/(state.rates[c.currency]||1))*100)/100
       };
     });
+  }
+  // 每项各自四舍五入后加总可能差几分钱：把差额补到金额最大的一项（优先选本位币的分类，才能精确补齐）
+  const diffBase = targetBase - rows.reduce((s,r)=>s+toBase(r.amount, r.currency), 0);
+  if(Math.abs(diffBase) >= 0.005){
+    const pool = rows.filter(r=>r.currency===state.baseCurrency);
+    const pick = (pool.length?pool:rows).reduce((a,b)=>toBase(b.amount,b.currency)>toBase(a.amount,a.currency)?b:a);
+    pick.amount = r2(pick.amount + fromBase(diffBase, pick.currency));
   }
   document.getElementById('alloc_rows').innerHTML = rows.map(r=>`
     <div class="row" style="margin-bottom:8px;">
@@ -1224,16 +1390,19 @@ function confirmAllocation(){
   if(inputs.length===0) return alert('请先点「生成建议分配」');
   let sumBase = 0;
   inputs.forEach(inp=>{ sumBase += toBase(parseFloat(inp.value)||0, inp.dataset.currency); });
-  if(sumBase > (state.unallocated||0) && !confirm('分配总额超过未分配池余额，确认后未分配会变成负数，仍要继续吗？')) return;
+  // 容许几分钱的换算误差（例如分类是 MYR 时，0.01 MYR = 0.08 NTD），避免误报
+  if(sumBase - (state.unallocated||0) > 0.1 && !confirm('分配总额超过未分配池余额，确认后未分配会变成负数，仍要继续吗？')) return;
   inputs.forEach(inp=>{
     const amt = parseFloat(inp.value)||0;
     const cat = state.categories.find(c=>c.id===inp.dataset.catid);
     if(cat && amt!==0){
+      const amtBase = toBase(amt, cat.currency);
       cat.balance += amt;
-      addHistoryEntry({type:'allocation', categoryId:cat.id, categoryName:cat.name, amount:amt, currency:cat.currency});
+      state.unallocated = (state.unallocated||0) - amtBase;
+      addHistoryEntry({type:'allocation', categoryId:cat.id, categoryName:cat.name, amount:amt, currency:cat.currency,
+        catDelta:amt, catCurrency:cat.currency, poolDelta:-amtBase});
     }
   });
-  state.unallocated = (state.unallocated||0) - sumBase;
   save(); closeModal(); render();
 }
 
@@ -1315,6 +1484,9 @@ function submitAddCurrency(){
   const code = document.getElementById('f_code').value.trim().toUpperCase();
   const rate = parseFloat(document.getElementById('f_rate').value);
   if(!code) return alert('请输入币种代码');
+  if(!/^[A-Z]{2,5}$/.test(code)) return alert('币种代码请用 2～5 个英文字母，例如 USD');
+  if(code===state.baseCurrency) return alert(`${code} 是本位币，汇率固定为 1，不用添加。`);
+  if(state.rates[code]!==undefined) return alert(`${code} 已经有了，要改汇率请直接在「汇率设置」里改。`);
   if(isNaN(rate) || rate<=0) return alert('请输入有效汇率');
   state.rates[code] = rate;
   save(); closeModal(); render();
@@ -1322,7 +1494,7 @@ function submitAddCurrency(){
 
 function updateRate(code, value){
   const rate = parseFloat(value);
-  if(isNaN(rate) || rate<=0) return;
+  if(isNaN(rate) || rate<=0 || code===state.baseCurrency) return;
   state.rates[code] = rate;
   save();
 }
@@ -1350,7 +1522,7 @@ function exportData(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `budget-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `budget-backup-${localDateStr()}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
